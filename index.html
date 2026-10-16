@@ -1,152 +1,446 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#10243b">
-<title>IoT E-Load | Electricity Monitoring</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172b43}
-header{background:#10243b;color:white;padding:22px 18px}
-header h2{margin:0 0 6px}
-header p{margin:0;color:#cbd5e1;font-size:13px}
-main{max-width:760px;margin:auto;padding:16px}
-.tabs{display:flex;gap:10px;margin-bottom:18px}
-button,select,input{font:inherit}
-.tabs button{flex:1;padding:12px;border:0;border-radius:10px;background:#dce5ef;color:#17324d;font-weight:bold}
-.tabs button.active{background:#1769e0;color:white}
-.section-title{font-size:18px;margin:20px 0 12px}
-.card{background:white;padding:17px;border-radius:14px;margin-bottom:13px;box-shadow:0 3px 12px #10243b0c}
-.room-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.room-head h3{margin:0}
-.status{font-size:12px;color:#087443;background:#dcfce7;padding:6px 9px;border-radius:20px}
-.status.off{color:#b91c1c;background:#fee2e2}
-.balance{font-size:30px;font-weight:bold;margin:17px 0 5px}
-.muted{color:#64748b;font-size:13px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.metric{background:#f1f5f9;border-radius:10px;padding:12px}
-.metric span{display:block;color:#64748b;font-size:12px}
-.metric strong{display:block;margin-top:7px;font-size:18px}
-label{display:block;font-size:13px;font-weight:bold;margin:12px 0 6px}
-input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;background:white}
-.action{width:100%;border:0;background:#1769e0;color:white;font-weight:bold;padding:13px;border-radius:10px;margin-top:12px}
-.notice{background:#fff7d6;color:#805b00;padding:12px;border-radius:10px;font-size:13px;line-height:1.5}
-.hidden{display:none}
-footer{text-align:center;color:#64748b;font-size:12px;padding:20px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boarding House Electricity</title>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #172033;
+    }
+    header {
+      background: #123b63;
+      color: white;
+      padding: 20px;
+    }
+    main { max-width: 900px; margin: auto; padding: 18px; }
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px #0000000c;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 7px 0;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 16px;
+    }
+    button {
+      background: #1769aa;
+      color: white;
+      border: 0;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .5; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .value { font-size: 23px; font-weight: bold; }
+    .muted { color: #64748b; font-size: 13px; }
+    .error { color: #b91c1c; }
+    .success { color: #166534; }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    [hidden] { display: none !important; }
+  </style>
 </head>
+
 <body>
 <header>
-  <h2>⚡ IoT E-Load</h2>
-  <p>Boarding House Electricity Monitoring System</p>
+  <h2>Boarding House Electricity</h2>
+  <div>Prepaid Energy Monitoring System</div>
 </header>
 
 <main>
-  <div class="tabs">
-    <button id="landlordTab" class="active" onclick="showPage('landlord')">Landlord</button>
-    <button id="tenantTab" onclick="showPage('tenant')">Tenant</button>
-  </div>
-
-  <section id="landlord">
-    <h3 class="section-title">Landlord Dashboard</h3>
-    <div class="notice">Demo preview only. The values below are sample values, not live ESP32 readings.</div>
-    <div id="rooms"></div>
-
-    <div class="card">
-      <h3>Load Electricity</h3>
-      <label for="roomSelect">Select room</label>
-      <select id="roomSelect">
-        <option value="0">Room 1</option>
-        <option value="1">Room 2</option>
-        <option value="2">Room 3</option>
-      </select>
-      <label for="loadAmount">Loading amount (kWh)</label>
-      <input id="loadAmount" type="number" min="1" max="20" step="1" value="1">
-      <button class="action" onclick="demoTopUp()">Add Demo Balance</button>
-      <p class="muted">This button only changes the sample value on this page. It does not charge a payment or switch electricity.</p>
-    </div>
+  <section id="loginPanel" class="card">
+    <h3>Account Login</h3>
+    <p class="muted">Sign in using your registered Firebase account.</p>
+    <form id="loginForm">
+      <input id="email" type="email" placeholder="Email address"
+             autocomplete="username" required>
+      <input id="password" type="password" placeholder="Password"
+             autocomplete="current-password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="loginMessage" role="status"></p>
   </section>
 
-  <section id="tenant" class="hidden">
-    <h3 class="section-title">Tenant Dashboard</h3>
-    <div class="notice">Demo preview only. Account login and room-specific access will be added when Firebase is connected.</div>
+  <section id="dashboard" hidden>
     <div class="card">
-      <div class="room-head">
-        <h3 id="tenantRoom">Room 1</h3>
-        <span class="status" id="tenantStatus">Demo status</span>
-      </div>
-      <div class="balance"><span id="tenantBalance">10.00</span> kWh</div>
-      <div class="muted">Remaining electricity balance</div>
-      <div class="grid">
-        <div class="metric"><span>Voltage</span><strong>-- V</strong></div>
-        <div class="metric"><span>Current</span><strong>-- A</strong></div>
-        <div class="metric"><span>Power</span><strong>-- W</strong></div>
-        <div class="metric"><span>Total energy</span><strong>-- kWh</strong></div>
-      </div>
+      <h3 id="welcome">Dashboard</h3>
+      <div id="accountInfo" class="muted"></div>
+      <p id="statusMessage" role="status"></p>
+      <button id="logoutButton">Logout</button>
     </div>
-    <div class="card">
-      <h3>Electricity Information</h3>
-      <p class="muted">Your actual balance, consumption history, notifications, and supply status will appear here after the secure Firebase connection is configured.</p>
-    </div>
+
+    <section id="landlordPanel" hidden>
+      <div class="card">
+        <h3>Landlord — Load Electricity</h3>
+        <label for="roomSelect">Select room</label>
+        <select id="roomSelect">
+          <option value="room1">Room 1</option>
+          <option value="room2">Room 2</option>
+          <option value="room3">Room 3</option>
+        </select>
+
+        <label for="loadAmount">Top-up amount (kWh, 1–20)</label>
+        <input id="loadAmount" type="number" min="1" max="20"
+               step="1" value="1" required>
+
+        <button id="loadButton">Add Electricity Credit</button>
+        <p class="muted">
+          This adds to the existing cumulative loaded value.
+          Confirm the room and amount before loading.
+        </p>
+      </div>
+
+      <h3>All Rooms</h3>
+      <div id="landlordRooms" class="grid"></div>
+    </section>
+
+    <section id="tenantPanel" hidden>
+      <div class="card">
+        <h3 id="tenantRoomTitle">My Room</h3>
+        <div class="grid">
+          <div>
+            <div class="muted">Total Loaded</div>
+            <div id="tenantLoaded" class="value">—</div>
+            <div>kWh</div>
+          </div>
+          <div>
+            <div class="muted">Balance</div>
+            <div id="tenantBalance" class="value">—</div>
+            <div>kWh</div>
+          </div>
+          <div>
+            <div class="muted">Cutoff</div>
+            <div id="tenantCutoff" class="value">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Electricity Readings</h3>
+        <div class="grid">
+          <div>Voltage <div id="tenantVoltage" class="value">—</div></div>
+          <div>Current <div id="tenantCurrent" class="value">—</div></div>
+          <div>Power <div id="tenantPower" class="value">—</div></div>
+          <div>Total Energy <div id="tenantEnergy" class="value">—</div></div>
+          <div>Room Status <div id="tenantActive" class="value">—</div></div>
+        </div>
+        <p class="muted">
+          Readings depend on the field names currently stored in Firebase.
+        </p>
+      </div>
+    </section>
   </section>
 </main>
 
-<footer>IoT-Based Boarding House Project · Prototype</footer>
+<!-- Firebase Web SDK: compatibility version for a simple HTML page -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-const roomData = [
-  {name:"Room 1",balance:10,loaded:10,used:0,active:true},
-  {name:"Room 2",balance:10,loaded:10,used:0,active:true},
-  {name:"Room 3",balance:10,loaded:10,used:0,active:true}
-];
+  // REPLACE these values with your Firebase Web App configuration.
+ const firebaseConfig = {
+  apiKey: "AIzaSyDcnmLmL5sYGGzf8A_C2aF30G55gh14oPY",
+  authDomain: "iot-based-eload-monitoring.firebaseapp.com",
+  databaseURL: "https://iot-based-eload-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "iot-based-eload-monitoring",
+  storageBucket: "iot-based-eload-monitoring.firebasestorage.app",
+  messagingSenderId: "686140232081",
+  appId: "1:686140232081:web:a1ec0d1e8be8813d1dca30"
+};
 
-function showPage(page){
-  document.getElementById("landlord").classList.toggle("hidden",page!=="landlord");
-  document.getElementById("tenant").classList.toggle("hidden",page!=="tenant");
-  document.getElementById("landlordTab").classList.toggle("active",page==="landlord");
-  document.getElementById("tenantTab").classList.toggle("active",page==="tenant");
-  renderRooms();
-}
+  // Display routing only. Database Rules must enforce real permissions.
+  const LANDLORD_EMAIL = "njl022326@gmail.com";
 
-function renderRooms(){
-  document.getElementById("rooms").innerHTML=roomData.map((r,i)=>`
-    <div class="card">
-      <div class="room-head">
-        <h3>${r.name}</h3>
-        <span class="status ${r.active?"":"off"}">${r.active?"Demo Active":"Demo Inactive"}</span>
-      </div>
-      <div class="balance">${r.balance.toFixed(2)} kWh</div>
-      <div class="muted">Sample remaining balance</div>
-      <div class="grid">
-        <div class="metric"><span>Total loaded</span><strong>${r.loaded.toFixed(2)} kWh</strong></div>
-        <div class="metric"><span>Total consumed</span><strong>${r.used.toFixed(2)} kWh</strong></div>
-      </div>
-      <button class="action" onclick="viewTenant(${i})">Preview Tenant View</button>
-    </div>`).join("");
-}
+  const TENANT_ROOMS = {
+    "room1access@gmail.com": "room1",
+    "room02access@gmail.com": "room2",
+    "room003access@gmail.com": "room3"
+  };
 
-function demoTopUp(){
-  const i=Number(document.getElementById("roomSelect").value);
-  const amount=Number(document.getElementById("loadAmount").value);
-  if(!Number.isFinite(amount)||amount<1||amount>20||!Number.isInteger(amount)){
-    alert("Enter a whole number from 1 to 20 kWh.");
-    return;
+  const $ = id => document.getElementById(id);
+  let auth;
+  let db;
+  let activeRoom = null;
+  let listeners = [];
+  let isLandlord = false;
+
+  function showMessage(id, message, isError = false) {
+    const el = $(id);
+    el.textContent = message;
+    el.className = isError ? "error" : "success";
   }
-  roomData[i].balance+=amount;
-  roomData[i].loaded+=amount;
-  renderRooms();
-  alert("Demo balance updated. This has not been saved to Firebase.");
-}
 
-function viewTenant(i){
-  document.getElementById("tenantRoom").textContent=roomData[i].name;
-  document.getElementById("tenantBalance").textContent=roomData[i].balance.toFixed(2);
-  document.getElementById("tenantStatus").textContent="Demo only";
-  showPage("tenant");
-}
+  function display(value, digits = 2) {
+    if (value === null || value === undefined || value === "") return "—";
+    const n = Number(value);
+    return Number.isFinite(n) ? n.toFixed(digits) : String(value);
+  }
 
-renderRooms();
+  function firstValue(obj, keys) {
+    for (const key of keys) {
+      if (obj && obj[key] !== undefined && obj[key] !== null) {
+        return obj[key];
+      }
+    }
+    return null;
+  }
+
+  function stopListeners() {
+    listeners.forEach(item => item.ref.off("value", item.callback));
+    listeners = [];
+  }
+
+  function watch(path, callback) {
+    const ref = db.ref(path);
+    ref.on("value", snapshot => callback(snapshot.val()),
+      error => showMessage("statusMessage", error.message, true));
+    listeners.push({ ref, callback });
+  }
+
+  function renderRoomCard(room, ctrl, live) {
+    const loaded = ctrl ? ctrl.loaded : null;
+    const balance = firstValue(live, ["balance", "remainingKwh", "remaining_kwh"]);
+    const cutoff = ctrl ? ctrl.cutoff : null;
+    const voltage = firstValue(live, ["voltage", "Voltage"]);
+    const power = firstValue(live, ["power", "Power"]);
+    const active = firstValue(live, ["active", "status", "online"]);
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = room.toUpperCase();
+    card.appendChild(title);
+
+    const details = document.createElement("pre");
+    details.textContent =
+      "Total loaded: " + display(loaded) + " kWh\n" +
+      "Balance: " + display(balance) + " kWh\n" +
+      "Voltage: " + display(voltage) + " V\n" +
+      "Power: " + display(power) + " W\n" +
+      "Cutoff: " +
+      (cutoff === null ? "Unknown" : (cutoff ? "ON" : "OFF")) + "\n" +
+      "Status: " + (active === null ? "Unknown" : String(active));
+    card.appendChild(details);
+
+    return card;
+  }
+
+  function showLandlord() {
+    $("landlordPanel").hidden = false;
+    $("tenantPanel").hidden = true;
+    $("welcome").textContent = "Landlord Dashboard";
+    $("accountInfo").textContent = "Monitoring: Rooms 1, 2, and 3";
+
+    const state = {};
+    ["room1", "room2", "room3"].forEach(room => {
+      state[room] = { ctrl: null, live: null };
+
+      watch("rooms/" + room + "/ctrl", value => {
+        state[room].ctrl = value || {};
+        render();
+      });
+
+      watch("rooms/" + room + "/live", value => {
+        state[room].live = value || {};
+        render();
+      });
+    });
+
+    function render() {
+      const container = $("landlordRooms");
+      container.replaceChildren();
+
+      ["room1", "room2", "room3"].forEach(room => {
+        container.appendChild(
+          renderRoomCard(room, state[room].ctrl, state[room].live)
+        );
+      });
+    }
+  }
+
+  function showTenant(room) {
+    activeRoom = room;
+    $("landlordPanel").hidden = true;
+    $("tenantPanel").hidden = false;
+    $("welcome").textContent = "Tenant Dashboard";
+    $("accountInfo").textContent = "Signed in for " + room.toUpperCase();
+    $("tenantRoomTitle").textContent = room.toUpperCase() + " — My Electricity";
+
+    watch("rooms/" + room + "/ctrl", ctrl => {
+      ctrl = ctrl || {};
+      $("tenantLoaded").textContent = display(ctrl.loaded);
+      $("tenantCutoff").textContent =
+        ctrl.cutoff === undefined ? "Unknown" : (ctrl.cutoff ? "ON" : "OFF");
+    });
+
+    watch("rooms/" + room + "/live", live => {
+      live = live || {};
+      $("tenantBalance").textContent =
+        display(firstValue(live, ["balance", "remainingKwh", "remaining_kwh"]));
+      $("tenantVoltage").textContent =
+        display(firstValue(live, ["voltage", "Voltage"])) + " V";
+      $("tenantCurrent").textContent =
+        display(firstValue(live, ["current", "Current"])) + " A";
+      $("tenantPower").textContent =
+        display(firstValue(live, ["power", "Power"])) + " W";
+      $("tenantEnergy").textContent =
+        display(firstValue(live, ["totalEnergy", "total_kwh", "energy"])) + " kWh";
+
+      const active = firstValue(live, ["active", "status", "online"]);
+      $("tenantActive").textContent =
+        active === null ? "Unknown" : String(active);
+    });
+  }
+
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    showMessage("loginMessage", "Signing in...");
+
+    try {
+      if (!auth) {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.database();
+      }
+
+      await auth.signInWithEmailAndPassword(
+        $("email").value.trim(),
+        $("password").value
+      );
+    } catch (error) {
+      showMessage("loginMessage", error.message, true);
+    }
+  });
+
+  function startDashboard(user) {
+    stopListeners();
+    $("loginPanel").hidden = true;
+    $("dashboard").hidden = false;
+    showMessage("statusMessage", "Signed in. Loading Firebase data...");
+
+    const email = (user.email || "").toLowerCase();
+    isLandlord = email === LANDLORD_EMAIL.toLowerCase();
+
+    if (isLandlord) {
+      showLandlord();
+      showMessage("statusMessage", "Landlord dashboard connected.");
+      return;
+    }
+
+    const room = TENANT_ROOMS[email];
+    if (room) {
+      showTenant(room);
+      showMessage("statusMessage", "Tenant dashboard connected.");
+      return;
+    }
+
+    stopListeners();
+    $("dashboard").hidden = true;
+    $("loginPanel").hidden = false;
+    auth.signOut();
+    showMessage(
+      "loginMessage",
+      "This email is not assigned in the dashboard code. Check the configured email mapping.",
+      true
+    );
+  }
+
+  $("loadButton").addEventListener("click", async () => {
+    if (!auth || !auth.currentUser || !isLandlord) {
+      showMessage("statusMessage", "Landlord login required.", true);
+      return;
+    }
+
+    const room = $("roomSelect").value;
+    const amount = Number($("loadAmount").value);
+
+    if (!Number.isInteger(amount) || amount < 1 || amount > 20) {
+      showMessage("statusMessage", "Enter a whole number from 1 to 20 kWh.", true);
+      return;
+    }
+
+    const confirmed = confirm(
+      "Add " + amount + " kWh to " + room.toUpperCase() + "?"
+    );
+    if (!confirmed) return;
+
+    $("loadButton").disabled = true;
+
+    try {
+      const loadedRef = db.ref("rooms/" + room + "/ctrl/loaded");
+      const result = await loadedRef.transaction(current => {
+        const oldValue = Number(current || 0);
+        if (!Number.isFinite(oldValue) || oldValue < 0) return;
+        return oldValue + amount;
+      });
+
+      if (!result.committed) {
+        throw new Error("The top-up was not committed. Check Firebase Rules.");
+      }
+
+      showMessage(
+        "statusMessage",
+        "Top-up saved. New cumulative total: " +
+          Number(result.snapshot.val()).toFixed(2) + " kWh."
+      );
+    } catch (error) {
+      showMessage("statusMessage", "Top-up failed: " + error.message, true);
+    } finally {
+      $("loadButton").disabled = false;
+    }
+  });
+
+  $("logoutButton").addEventListener("click", async () => {
+    stopListeners();
+    await auth.signOut();
+    $("dashboard").hidden = true;
+    $("loginPanel").hidden = false;
+    $("password").value = "";
+    showMessage("loginMessage", "Logged out.");
+  });
+
+  // Initialize Firebase once, then restore an existing login session.
+  try {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.database();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        startDashboard(user);
+      } else {
+        stopListeners();
+        $("dashboard").hidden = true;
+        $("loginPanel").hidden = false;
+      }
+    });
+  } catch (error) {
+    showMessage("loginMessage", "Firebase setup error: " + error.message, true);
+  }
 </script>
 </body>
 </html>
