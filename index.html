@@ -131,7 +131,14 @@
           </div>
           <div>
             <div class="muted">Cutoff</div>
-            <div id="tenantCutoff" class="value">—</div>
+<div id="tenantCutoff" class="value">—</div>
+<button id="tenantCutoffButton" type="button" disabled>
+  Waiting for Firebase...
+</button>
+<p class="muted">
+  Cutoff ON = manually turn the room power OFF.
+  Cutoff OFF = allow power if balance and safety checks pass.
+</p>
           </div>
         </div>
       </div>
@@ -185,6 +192,9 @@
   let activeRoom = null;
   let listeners = [];
   let isLandlord = false;
+  let tenantCutoffState = false;
+  let tenantCutoffKnown = false;
+  let tenantCutoffBusy = false;
 
   function showMessage(id, message, isError = false) {
     const el = $(id);
@@ -281,39 +291,111 @@
     }
   }
 
-  function showTenant(room) {
-    activeRoom = room;
-    $("landlordPanel").hidden = true;
-    $("tenantPanel").hidden = false;
-    $("welcome").textContent = "Tenant Dashboard";
-    $("accountInfo").textContent = "Signed in for " + room.toUpperCase();
-    $("tenantRoomTitle").textContent = room.toUpperCase() + " — My Electricity";
+function showTenant(room) {
+  activeRoom = room;
+  tenantCutoffKnown = false;
+  tenantCutoffBusy = false;
 
-    watch("rooms/" + room + "/ctrl", ctrl => {
-      ctrl = ctrl || {};
-      $("tenantLoaded").textContent = display(ctrl.loaded);
+  $("landlordPanel").hidden = true;
+  $("tenantPanel").hidden = false;
+  $("welcome").textContent = "Tenant Dashboard";
+  $("accountInfo").textContent = "Signed in for " + room.toUpperCase();
+  $("tenantRoomTitle").textContent =
+    room.toUpperCase() + " — My Electricity";
+
+  const cutoffButton = $("tenantCutoffButton");
+  cutoffButton.disabled = true;
+  cutoffButton.textContent = "Waiting for Firebase...";
+
+  watch("rooms/" + room + "/ctrl", ctrl => {
+    ctrl = ctrl || {};
+
+    $("tenantLoaded").textContent = display(ctrl.loaded);
+
+    if (typeof ctrl.cutoff === "boolean") {
+      tenantCutoffState = ctrl.cutoff;
+      tenantCutoffKnown = true;
+
       $("tenantCutoff").textContent =
-        ctrl.cutoff === undefined ? "Unknown" : (ctrl.cutoff ? "ON" : "OFF");
-    });
+        tenantCutoffState ? "ON — POWER OFF" : "OFF — POWER ALLOWED";
 
-    watch("rooms/" + room + "/live", live => {
-      live = live || {};
-      $("tenantBalance").textContent =
-        display(firstValue(live, ["balance", "remainingKwh", "remaining_kwh"]));
-      $("tenantVoltage").textContent =
-        display(firstValue(live, ["voltage", "Voltage"])) + " V";
-      $("tenantCurrent").textContent =
-        display(firstValue(live, ["current", "Current"])) + " A";
-      $("tenantPower").textContent =
-        display(firstValue(live, ["power", "Power"])) + " W";
-      $("tenantEnergy").textContent =
-        display(firstValue(live, ["totalEnergy", "total_kwh", "energy"])) + " kWh";
+      cutoffButton.disabled = tenantCutoffBusy;
+      cutoffButton.textContent = tenantCutoffState
+        ? "Turn Cutoff OFF (Restore Power)"
+        : "Turn Cutoff ON (Cut Power)";
+    } else {
+      tenantCutoffKnown = false;
+      $("tenantCutoff").textContent = "Unknown";
+      cutoffButton.disabled = true;
+      cutoffButton.textContent = "Cutoff setting unavailable";
+    }
+  });
 
-      const active = firstValue(live, ["active", "status", "online"]);
-      $("tenantActive").textContent =
-        active === null ? "Unknown" : String(active);
-    });
+  watch("rooms/" + room + "/live", live => {
+    live = live || {};
+
+    $("tenantBalance").textContent =
+      display(firstValue(live, ["balance", "remainingKwh", "remaining_kwh"]));
+
+    $("tenantVoltage").textContent =
+      display(firstValue(live, ["voltage", "Voltage"])) + " V";
+
+    $("tenantCurrent").textContent =
+      display(firstValue(live, ["current", "Current"])) + " A";
+
+    $("tenantPower").textContent =
+      display(firstValue(live, ["power", "Power"])) + " W";
+
+    $("tenantEnergy").textContent =
+      display(firstValue(live, ["totalEnergy", "total_kwh", "energy"])) + " kWh";
+
+    const active = firstValue(live, ["status", "active", "online"]);
+    const isActive =
+      active === true || active === 1 ||
+      active === "1" || active === "true";
+
+    $("tenantActive").textContent =
+      active === null ? "UNKNOWN" : (isActive ? "ACTIVE" : "INACTIVE");
+  });
+}
+
+$("tenantCutoffButton").addEventListener("click", async () => {
+  if (!auth || !auth.currentUser || !activeRoom ||
+      !tenantCutoffKnown || tenantCutoffBusy) {
+    return;
   }
+
+  const nextCutoff = !tenantCutoffState;
+
+  const actionText = nextCutoff
+    ? "turn OFF electricity"
+    : "allow electricity to turn ON";
+
+  if (!confirm("Do you want to " + actionText + " for " +
+      activeRoom.toUpperCase() + "?")) {
+    return;
+  }
+
+  tenantCutoffBusy = true;
+  $("tenantCutoffButton").disabled = true;
+
+  try {
+    await db.ref("rooms/" + activeRoom + "/ctrl/cutoff")
+      .set(nextCutoff);
+
+    showMessage(
+      "statusMessage",
+      nextCutoff
+        ? "Cutoff command saved. Waiting for the ESP32."
+        : "Cutoff released. Power still depends on balance and safety checks."
+    );
+  } catch (error) {
+    showMessage("statusMessage", "Cutoff update failed: " + error.message, true);
+  } finally {
+    tenantCutoffBusy = false;
+    $("tenantCutoffButton").disabled = !tenantCutoffKnown;
+  }
+});
 
   $("loginForm").addEventListener("submit", async event => {
     event.preventDefault();
