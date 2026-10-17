@@ -13,6 +13,18 @@
       background: #f1f5f9;
       color: #172033;
     }
+   .balance-gauge-card {
+     background: #ffffff;
+     border-radius: 14px;
+     padding: 18px;
+     margin: 12px 0;
+     text-align: center;
+   }
+
+#balanceGaugeArc {
+  transition: stroke-dasharray 0.4s ease;
+}
+
     header {
       background: #123b63;
       color: white;
@@ -124,11 +136,72 @@
             <div id="tenantLoaded" class="value">—</div>
             <div>kWh</div>
           </div>
-          <div>
-            <div class="muted">Balance</div>
-            <div id="tenantBalance" class="value">—</div>
-            <div>kWh</div>
-          </div>
+          <div class="balance-gauge-card">
+  <div class="muted">AVAILABLE / TOTAL LOADED</div>
+
+  <svg viewBox="0 0 320 185"
+       role="img"
+       aria-label="Available electricity balance compared with total loaded electricity"
+       style="width:100%;max-width:360px;display:block;margin:auto">
+
+    <path
+      d="M 40 150 A 120 120 0 0 1 280 150"
+      fill="none"
+      stroke="#dbe3ed"
+      stroke-width="20"
+      stroke-linecap="round"
+    />
+
+    <path
+      id="balanceGaugeArc"
+      d="M 40 150 A 120 120 0 0 1 280 150"
+      fill="none"
+      stroke="#159a72"
+      stroke-width="20"
+      stroke-linecap="round"
+      pathLength="100"
+      stroke-dasharray="0 100"
+    />
+
+    <text
+      id="balanceGaugeRatio"
+      x="160" y="100"
+      text-anchor="middle"
+      font-size="30"
+      font-weight="bold"
+      fill="currentColor">— / —</text>
+
+    <text
+      x="160" y="124"
+      text-anchor="middle"
+      font-size="13"
+      fill="currentColor">kWh</text>
+
+    <text
+      x="40" y="177"
+      text-anchor="middle"
+      font-size="12"
+      fill="currentColor">0</text>
+
+    <text
+      id="balanceGaugeMax"
+      x="280" y="177"
+      text-anchor="middle"
+      font-size="12"
+      fill="currentColor">— kWh</text>
+  </svg>
+
+  <div class="grid">
+    <div>
+      <div class="muted">Available Balance</div>
+      <div id="tenantBalance" class="value">— kWh</div>
+    </div>
+    <div>
+      <div class="muted">Cumulative Loaded</div>
+      <div id="tenantLoadedGauge" class="value">— kWh</div>
+    </div>
+  </div>
+</div>
           <div>
             <div class="muted">Cutoff</div>
 <div id="tenantCutoff" class="value">—</div>
@@ -207,6 +280,63 @@
     const n = Number(value);
     return Number.isFinite(n) ? n.toFixed(digits) : String(value);
   }
+
+  let tenantLoadedValue = null
+
+  function updateBalanceGauge(balanceValue, loadedValue) {
+  const balance = Number(balanceValue);
+  const loaded = Number(loadedValue);
+
+  const validBalance =
+    balanceValue !== null &&
+    balanceValue !== undefined &&
+    balanceValue !== "" &&
+    Number.isFinite(balance) &&
+    balance >= 0;
+
+  const validLoaded =
+    loadedValue !== null &&
+    loadedValue !== undefined &&
+    loadedValue !== "" &&
+    Number.isFinite(loaded) &&
+    loaded > 0;
+
+  const arc = $("balanceGaugeArc");
+
+  if (!validBalance || !validLoaded) {
+    $("balanceGaugeRatio").textContent = "— / —";
+    $("tenantBalance").textContent = "— kWh";
+    $("tenantLoadedGauge").textContent = "— kWh";
+    $("balanceGaugeMax").textContent = "— kWh";
+    arc.setAttribute("stroke-dasharray", "0 100");
+    return;
+  }
+
+  const safeBalance = Math.min(balance, loaded);
+  const percentage = (safeBalance / loaded) * 100;
+
+  $("balanceGaugeRatio").textContent =
+    safeBalance.toFixed(2) + " / " + loaded.toFixed(2);
+
+  $("tenantBalance").textContent =
+    safeBalance.toFixed(2) + " kWh";
+
+  $("tenantLoadedGauge").textContent =
+    loaded.toFixed(2) + " kWh";
+
+  $("balanceGaugeMax").textContent =
+    loaded.toFixed(2) + " kWh";
+
+  arc.setAttribute(
+    "stroke-dasharray",
+    percentage + " 100"
+  );
+
+  arc.setAttribute(
+    "stroke",
+    percentage <= 20 ? "#dc2626" : "#159a72"
+  );
+}
 
   function firstValue(obj, keys) {
     for (const key of keys) {
@@ -296,6 +426,10 @@ function showTenant(room) {
   tenantCutoffKnown = false;
   tenantCutoffBusy = false;
 
+  // Store the latest cumulative loaded value from Firebase
+  let tenantLoadedValue = null;
+  let tenantBalanceValue = null;
+
   $("landlordPanel").hidden = true;
   $("tenantPanel").hidden = false;
   $("welcome").textContent = "Tenant Dashboard";
@@ -307,10 +441,14 @@ function showTenant(room) {
   cutoffButton.disabled = true;
   cutoffButton.textContent = "Waiting for Firebase...";
 
+  // Read cumulative loaded credit and cutoff command
   watch("rooms/" + room + "/ctrl", ctrl => {
     ctrl = ctrl || {};
 
-    $("tenantLoaded").textContent = display(ctrl.loaded);
+    tenantLoadedValue = firstValue(ctrl, ["loaded"]);
+    $("tenantLoaded").textContent = display(tenantLoadedValue);
+
+    updateBalanceGauge(tenantBalanceValue, tenantLoadedValue);
 
     if (typeof ctrl.cutoff === "boolean") {
       tenantCutoffState = ctrl.cutoff;
@@ -331,11 +469,16 @@ function showTenant(room) {
     }
   });
 
+  // Read live balance and electrical readings
   watch("rooms/" + room + "/live", live => {
     live = live || {};
 
-    $("tenantBalance").textContent =
-      display(firstValue(live, ["balance", "remainingKwh", "remaining_kwh"]));
+    tenantBalanceValue = firstValue(
+      live,
+      ["balance", "remainingKwh", "remaining_kwh"]
+    );
+
+    updateBalanceGauge(tenantBalanceValue, tenantLoadedValue);
 
     $("tenantVoltage").textContent =
       display(firstValue(live, ["voltage", "Voltage"])) + " V";
@@ -350,12 +493,17 @@ function showTenant(room) {
       display(firstValue(live, ["totalEnergy", "total_kwh", "energy"])) + " kWh";
 
     const active = firstValue(live, ["status", "active", "online"]);
+
     const isActive =
-      active === true || active === 1 ||
-      active === "1" || active === "true";
+      active === true ||
+      active === 1 ||
+      active === "1" ||
+      active === "true";
 
     $("tenantActive").textContent =
-      active === null ? "UNKNOWN" : (isActive ? "ACTIVE" : "INACTIVE");
+      active === null
+        ? "UNKNOWN"
+        : (isActive ? "ACTIVE" : "INACTIVE");
   });
 }
 
