@@ -30,8 +30,7 @@ button:disabled{opacity:.5}
 .pill.g{background:var(--green)}.pill.r{background:var(--red)}
 .bar{height:10px;background:var(--track);border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--green)}
 .item{border-bottom:1px solid var(--line);padding:10px 0;cursor:pointer}.item:last-child{border:0}
-.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.chips{margin:10px 0}.seg{margin:10px 0}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.seg{margin:10px 0}
 .chip{background:var(--chip);color:var(--text);margin:0}.chip.on{background:var(--blue);color:#fff}
 .comp .stat{background:var(--card);margin-top:6px}.comp{background:var(--soft);border-radius:10px;padding:12px;margin:10px 0}.total{font-size:20px;font-weight:bold;color:var(--accent)}
 .chk{display:flex;align-items:center;padding:8px 0;font-size:16px}
@@ -39,8 +38,9 @@ button:disabled{opacity:.5}
 .seg button{margin:0;background:var(--chip);color:var(--text)}.seg button.on-b{background:var(--blue);color:#fff}.seg button.on-g{background:var(--green);color:#fff}.seg button.on-r{background:var(--red);color:#fff}
 .pw{position:relative}.pw input{padding-right:50px}
 .pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:42px;height:42px;margin:0;padding:0;background:none;color:var(--mut)}
-#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--line2);z-index:5}
-#tabs button{background:none;color:var(--mut);margin:0;border-radius:0;border:0;padding:10px 4px;font-size:12px}
+#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line2);z-index:5}
+#tabs button{background:none;color:var(--mut);margin:0;border-radius:0;border:0;padding:10px 2px;font-size:12px;position:relative}
+.badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;line-height:18px;padding:0 5px;font-style:normal;font-weight:bold}
 #tabs button.on{color:var(--blue)}#tabs span{display:block;font-size:22px}
 .overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .sheet{background:var(--card);color:var(--text);width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
@@ -83,6 +83,7 @@ button:disabled{opacity:.5}
     <div id="v-home" class="view"></div>
     <div id="v-profile" class="view" hidden></div>
     <div id="v-history" class="view" hidden></div>
+    <div id="v-notifs" class="view" hidden></div>
     <div id="v-settings" class="view" hidden></div>
     <div id="v-rate" class="view" hidden></div>
   </section>
@@ -92,6 +93,7 @@ button:disabled{opacity:.5}
   <button data-tab="home"><span>🏠</span>Dashboard</button>
   <button data-tab="profile"><span>👤</span>Profile</button>
   <button data-tab="history"><span>🧾</span>History</button>
+  <button data-tab="notifs"><span>🔔</span>Alerts<i class="badge" id="notifBadge" hidden>0</i></button>
   <button data-tab="menu"><span>☰</span>Menu</button>
 </nav>
 <div id="menuSheet" class="overlay" hidden><div class="sheet" id="menuBody"></div></div>
@@ -132,7 +134,7 @@ const KEYS = {
 
 const $ = id => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
-const S = { user: null, role: null, room: null, rate: null, gcash: {}, receipts: [], rooms: {} };
+const S = { user: null, role: null, room: null, rate: null, gcash: {}, receipts: [], rooms: {}, pending: [], results: [], zero: false, zeroRooms: [] };
 let auth, db, listeners = [], seenReq = null;
 
 const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v))) ? null : Number(v);
@@ -186,6 +188,7 @@ function showView(name) {
   $("menuSheet").hidden = true;
   if (name === "profile") buildProfile();
   if (name === "history") renderHistory();
+  if (name === "notifs") renderNotifs();
   if (name === "settings") buildSettings();
   if (name === "rate") buildRate();
   window.scrollTo(0, 0);
@@ -530,6 +533,89 @@ function readings(live) {
   return g;
 }
 
+/* ---------- Notifications (Alerts tab) ---------- */
+function updateBadge() {
+  const n = S.pending.length + (S.role === "landlord" ? S.zeroRooms.length : (S.zero ? 1 : 0));
+  const b = $("notifBadge"); if (!b) return;
+  b.textContent = n > 99 ? "99+" : String(n); b.hidden = n === 0;
+}
+function refreshNotifs() { updateBadge(); if (!$("v-notifs").hidden) renderNotifs(); }
+
+function landlordReqItem(r) {
+  const it = el("div", "item"); it.style.cursor = "default";
+  it.append(el("b", null, rname(r.room) + " · " + r.kwh + " kWh · " + peso(r.amount)),
+    el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual payment") + " · " + fdate(r.ts)));
+  const ok = el("button", null, "Confirm"), no = el("button", "sec", "Reject");
+  ok.onclick = async () => {
+    if (!confirm(r.method === "online" ? `Reference no. ${r.ref}\nDoes it match your payment record?` : "Confirm you received the manual payment?")) return;
+    ok.disabled = true;
+    try { const rc = await applyLoad({ room: r.room, kwh: r.kwh, rate: r.rate, amount: r.amount, method: r.method, ref: r.ref, requestId: r.id }); toast("Request confirmed."); showReceipt(rc); }
+    catch (e) { toast("Failed: " + e.message, true); ok.disabled = false; }
+  };
+  no.onclick = async () => {
+    if (!confirm("Reject this request?")) return;
+    try { await db.ref(`requests/${r.room}/${r.id}`).update({ status: "rejected" }); } catch (e) { toast("Failed: " + e.message, true); }
+  };
+  it.append(ok, no);
+  return it;
+}
+
+function renderNotifs() {
+  const v = $("v-notifs"), root = el("div");
+  root.append(el("h3", null, "🔔 Notifications"));
+
+  if (S.role === "landlord") {
+    const c = el("div", "card"); c.append(el("h3", null, "Load Requests (" + S.pending.length + ")"));
+    if (!S.pending.length) c.append(el("p", "muted", "No pending requests."));
+    S.pending.forEach(r => c.append(landlordReqItem(r)));
+    root.append(c);
+    if (S.zeroRooms.length) {
+      const z = el("div", "card"); z.append(el("h3", null, "⚠️ Zero Balance (" + S.zeroRooms.length + ")"));
+      S.zeroRooms.forEach(r => {
+        const it = el("div", "item"); it.style.cursor = "default";
+        it.append(el("b", null, rname(r)), el("div", "muted", "No balance left. Power stays cut until the room tops up."));
+        z.append(it);
+      });
+      root.append(z);
+    }
+  } else {
+    if (S.zero) {
+      const a = el("div", "alert");
+      a.append(el("b", null, "⚠️ Zero balance"),
+        el("div", null, "Your room's power is cut. Top up first before you can use electricity again."));
+      const b = el("button", null, "➕ Request Load"); b.onclick = () => loadFlow("tenant");
+      a.append(b); root.append(a);
+    }
+    if (S.pending.length) {
+      const c = el("div", "card"); c.append(el("h3", null, "Pending Requests (" + S.pending.length + ")"));
+      S.pending.forEach(r => {
+        const it = el("div", "item"); it.style.cursor = "default";
+        it.append(el("b", null, r.kwh + " kWh · " + peso(r.amount)),
+          el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual") + " · " + (r.status === "processing" ? "Being confirmed…" : "Waiting for landlord")),
+          el("div", "muted", fdate(r.ts)));
+        c.append(it);
+      });
+      root.append(c);
+    }
+    if (S.results.length) {
+      const c = el("div", "card"); c.append(el("h3", null, "Recent Updates"));
+      S.results.forEach(r => {
+        const ok = r.status === "confirmed";
+        const it = el("div", "item"); it.style.cursor = "default";
+        it.append(el("b", null, (ok ? "✅ Confirmed · " : "❌ Rejected · ") + r.kwh + " kWh · " + peso(r.amount)),
+          el("div", "muted", fdate(ok ? (r.confirmedTs || r.ts) : r.ts)));
+        c.append(it);
+      });
+      root.append(c);
+    }
+    if (!S.zero && !S.pending.length && !S.results.length) {
+      const c = el("div", "card"); c.append(el("p", "muted", "No notifications yet."));
+      root.append(c);
+    }
+  }
+  v.replaceChildren(root);
+}
+
 /* ---------- Landlord ---------- */
 function initLandlord() {
   const v = $("v-home"), c = el("div", "card");
@@ -548,6 +634,8 @@ function initLandlord() {
   watch("receipts", x => { S.receipts = flattenReceipts(x); if (!$("v-history").hidden) renderHistory(); });
 }
 function renderRooms() {
+  S.zeroRooms = ROOMS.filter(r => { const b = num(firstValue((S.rooms[r] || {}).live, KEYS.bal)); return b !== null && b <= ZERO_KWH; });
+  refreshNotifs();
   const box = $("roomsBox"); if (!box) return; box.replaceChildren();
   ROOMS.forEach(r => {
     const { ctrl, live } = S.rooms[r], loaded = num(ctrl.loaded) || 0, bal = num(firstValue(live, KEYS.bal));
@@ -560,7 +648,6 @@ function renderRooms() {
   });
 }
 function renderRequests(all) {
-  const box = $("reqBox"); if (!box) return; box.replaceChildren();
   const list = [];
   Object.entries(all || {}).forEach(([room, m]) => Object.entries(m || {}).forEach(([id, r]) => { if (r.status === "pending") list.push({ id, ...r, room }); }));
   list.sort((a, b) => (a.ts || 0) - (b.ts || 0));
@@ -568,26 +655,20 @@ function renderRequests(all) {
   if (seenReq === null) { if (ids.length) toast("🔔 " + ids.length + " pending load request(s)."); }
   else list.filter(r => !seenReq.includes(r.id)).forEach(r => toast(`🔔 ${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`));
   seenReq = ids;
-  if (!list.length) return;
-  const c = el("div", "card"); c.append(el("h3", null, "🔔 Load Requests (" + list.length + ")"));
-  list.forEach(r => {
-    const it = el("div", "item"); it.style.cursor = "default";
-    it.append(el("b", null, rname(r.room) + " · " + r.kwh + " kWh · " + peso(r.amount)),
-      el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual payment") + " · " + fdate(r.ts)));
-    const ok = el("button", null, "Confirm"), no = el("button", "sec", "Reject");
-    ok.onclick = async () => {
-      if (!confirm(r.method === "online" ? `Reference no. ${r.ref}\nDoes it match your payment record?` : "Confirm you received the manual payment?")) return;
-      ok.disabled = true;
-      try { const rc = await applyLoad({ room: r.room, kwh: r.kwh, rate: r.rate, amount: r.amount, method: r.method, ref: r.ref, requestId: r.id }); toast("Request confirmed."); showReceipt(rc); }
-      catch (e) { toast("Failed: " + e.message, true); ok.disabled = false; }
-    };
-    no.onclick = async () => {
-      if (!confirm("Reject this request?")) return;
-      try { await db.ref(`requests/${r.room}/${r.id}`).update({ status: "rejected" }); } catch (e) { toast("Failed: " + e.message, true); }
-    };
-    it.append(ok, no); c.append(it);
-  });
-  box.append(c);
+  S.pending = list;
+
+  // Small banner on the dashboard that opens the Alerts tab
+  const box = $("reqBox");
+  if (box) {
+    box.replaceChildren();
+    if (list.length) {
+      const a = el("div", "alert");
+      a.append(el("b", null, "🔔 " + list.length + " pending load request" + (list.length > 1 ? "s" : "")));
+      const go = el("button", null, "View requests"); go.onclick = () => showView("notifs");
+      a.append(go); box.append(a);
+    }
+  }
+  refreshNotifs();
 }
 
 /* ---------- Tenant ---------- */
@@ -624,7 +705,6 @@ function initTenant(room) {
     <div class="grid2"><div id="tBal"></div><div id="tLoaded"></div></div>
     <button id="reqLoadBtn">➕ Request Load</button>
   </div>
-  <div id="tReq"></div>
   <div class="card">
     <h3>Power Control</h3>
     <div id="tCutState" class="value">—</div>
@@ -672,6 +752,7 @@ function initTenant(room) {
     }
     if (zero && T.wasZero === false) toast("⚠️ Zero balance. Please top up to use electricity.", true);
     T.wasZero = zero;
+    S.zero = zero; refreshNotifs();
   };
 
   watch(`rooms/${room}/ctrl`, c => {
@@ -699,13 +780,9 @@ function initTenant(room) {
       }
     });
     setSeen(seen);
-    const pend = arr.filter(r => r.status === "pending" || r.status === "processing");
-    const box = $("tReq"); box.replaceChildren();
-    if (!pend.length) return;
-    const c = el("div", "card"); c.append(el("h3", null, "Pending Requests"));
-    pend.forEach(r => { const it = el("div", "item"); it.style.cursor = "default";
-      it.append(el("b", null, r.kwh + " kWh · " + peso(r.amount)), el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual") + " · Waiting for landlord")); c.append(it); });
-    box.append(c);
+    S.pending = arr.filter(r => r.status === "pending" || r.status === "processing");
+    S.results = arr.filter(r => r.status === "confirmed" || r.status === "rejected").slice(0, 10);
+    refreshNotifs();
   });
   watch("receipts/" + room, x => { S.receipts = flattenReceipts(x, room); if (!$("v-history").hidden) renderHistory(); });
 }
@@ -720,6 +797,7 @@ function startDashboard(user) {
   stopListeners();
   const email = (user.email || "").toLowerCase();
   S.user = user; S.receipts = []; S.rooms = {}; S.rate = null; S.gcash = {};
+  S.pending = []; S.results = []; S.zero = false; S.zeroRooms = [];
   S.role = email === LANDLORD_EMAIL.toLowerCase() ? "landlord" : (TENANT_ROOMS[email] ? "tenant" : null);
   S.room = TENANT_ROOMS[email] || null;
   if (!S.role) {
@@ -732,6 +810,7 @@ function startDashboard(user) {
   watch("settings", x => { x = x || {}; S.rate = num(x.rate); S.gcash = x.gcash || {}; if (!$("v-settings").hidden) buildSettings(); });
   S.role === "landlord" ? initLandlord() : initTenant(S.room);
   showView("home");
+  updateBadge();
 }
 async function logout() {
   stopListeners(); $("menuSheet").hidden = true;
