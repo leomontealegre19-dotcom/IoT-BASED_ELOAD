@@ -35,7 +35,7 @@ button:disabled{opacity:.5}
 .seg button{margin:0;background:#e2e8f0;color:#172033}.seg button.on-g{background:var(--green);color:#fff}.seg button.on-r{background:var(--red);color:#fff}
 .pw{position:relative}.pw input{padding-right:50px}
 .pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:42px;height:42px;margin:0;padding:0;background:none;color:var(--mut)}
-#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #cbd5e1;z-index:5}
+#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid #cbd5e1;z-index:5}
 #tabs button{background:none;color:var(--mut);margin:0;border-radius:0;border:0;padding:10px 4px;font-size:12px}
 #tabs button.on{color:var(--blue)}#tabs span{display:block;font-size:22px}
 .overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:10}
@@ -85,6 +85,7 @@ button:disabled{opacity:.5}
 </main>
 
 <nav id="tabs" hidden>
+  <button data-tab="home"><span>🏠</span>Dashboard</button>
   <button data-tab="profile"><span>👤</span>Profile</button>
   <button data-tab="history"><span>🧾</span>History</button>
   <button data-tab="menu"><span>☰</span>Menu</button>
@@ -175,7 +176,7 @@ function showView(name) {
 }
 function openMenu() {
   const b = $("menuBody"); b.replaceChildren(el("h3", null, "Menu"));
-  [["🏠 Dashboard", "home"], ["👤 Profile", "profile"], ["⚙️ Settings", "settings"], ["🧾 History", "history"], ["⭐ Rate this app", "rate"]]
+  [["👤 Profile", "profile"], ["⚙️ Settings", "settings"], ["🧾 History", "history"], ["⭐ Rate this app", "rate"]]
     .forEach(([l, v]) => { const x = el("button", "menuitem", l); x.onclick = () => showView(v); b.append(x); });
   const lo = el("button", "menuitem", "🚪 Logout"); lo.style.color = "#b91c1c"; lo.onclick = logout; b.append(lo);
   $("menuSheet").hidden = false;
