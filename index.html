@@ -14,6 +14,8 @@ header h2{margin:0;font-size:20px}header small{opacity:.85}
 #topMenu{width:44px;height:44px;margin:0;background:#ffffff22;font-size:22px;padding:0}
 main{max-width:720px;margin:auto;padding:14px}
 .card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0000000c}
+.alert{background:var(--card);border:2px solid var(--red);border-radius:14px;padding:14px;margin-bottom:14px}
+.alert b{color:var(--err);font-size:17px}
 h3{margin:0 0 8px}
 input,select,button,textarea{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--text);font-size:16px;font-family:inherit}
 input[type=checkbox]{width:auto;margin:0 8px 0 0;transform:scale(1.3)}
@@ -117,6 +119,9 @@ const TENANT_ROOMS = {
   "room003access@gmail.com": "room3"
 };
 const ROOMS = ["room1", "room2", "room3"];
+const ZERO_KWH = 0.0005;          // balance at or below this counts as zero
+const MAX_TOPUP_KWH = 500;        // safety limit for one top-up
+const MAX_TOPUP_PESO = 10000;     // safety limit for one top-up
 const KEYS = {
   bal: ["balance", "remainingKwh", "remaining_kwh"],
   v: ["voltage", "Voltage"], i: ["current", "Current"], p: ["power", "Power"],
@@ -332,7 +337,7 @@ function showReceipt(r) {
   const w = el("div"); w.append(el("h3", null, "🧾 Receipt"));
   const rc = el("div", "rc");
   [["Receipt No.", (r.id || "").slice(-8).toUpperCase()], ["Date", fdate(r.ts)], ["Room", rname(r.room)],
-   ["Loaded", r.kwh + " kWh"], ["Computation", r.kwh + " kWh × " + peso(r.rate)], ["Total Paid", peso(r.amount)],
+   ["Loaded", r.kwh + " kWh"], ["Rate", peso(r.rate) + " per kWh"], ["Total Paid", peso(r.amount)],
    ["Payment", r.method === "online" ? "Online payment" : "Manual payment"]]
     .concat(r.method === "online" ? [["Reference No.", r.ref]] : [])
     .forEach(([l, x]) => { const d = el("div"); d.append(el("span", null, l), el("span", null, x)); rc.append(d); });
@@ -359,17 +364,18 @@ function flattenReceipts(val, perRoom) {
 }
 
 /* ---------- Load flow (landlord loads / tenant requests) ---------- */
-async function applyLoad({ room, kwh, rate, method, ref, requestId }) {
+async function applyLoad({ room, kwh, rate, method, ref, requestId, amount }) {
   if (requestId) {
     const claim = await db.ref(`requests/${room}/${requestId}/status`).transaction(s => s === "pending" ? "processing" : undefined);
     if (!claim.committed) throw new Error("This request was already handled.");
   }
   const res = await db.ref(`rooms/${room}/ctrl/loaded`).transaction(c => {
-    const o = Number(c || 0); if (!Number.isFinite(o) || o < 0) return; return o + kwh;
+    const o = Number(c || 0); if (!Number.isFinite(o) || o < 0) return;
+    return Math.round((o + kwh) * 1000) / 1000;
   });
   if (!res.committed) throw new Error("Top-up not committed. Check Firebase Rules.");
   const rr = db.ref(`receipts/${room}`).push();
-  await rr.set({ room, kwh, rate, amount: +(kwh * rate).toFixed(2), method, ref: ref || "", ts: TS(), by: S.user.email });
+  await rr.set({ room, kwh, rate, amount: amount ?? +(kwh * rate).toFixed(2), method, ref: ref || "", ts: TS(), by: S.user.email });
   if (requestId) await db.ref(`requests/${room}/${requestId}`).update({ status: "confirmed", receiptId: rr.key, confirmedTs: TS() });
   const snap = await rr.once("value");
   return { id: rr.key, ...snap.val() };
@@ -377,50 +383,120 @@ async function applyLoad({ room, kwh, rate, method, ref, requestId }) {
 
 function loadFlow(mode) {
   if (!(S.rate > 0)) return toast(mode === "landlord" ? "Set the rate per kWh in Settings first." : "The landlord has not set the rate yet.", true);
-  const w = el("div"), st = { room: S.room, kwh: null, method: "manual" };
+  const w = el("div"), st = { room: S.room, entry: "kwh", kwh: null, amount: null, method: "manual" };
 
   function step2() {
     w.replaceChildren();
-    w.append(el("h3", null, (mode === "landlord" ? "Load " : "Request load for ") + rname(st.room)), el("div", "muted", "Choose top-up amount"));
+    w.append(el("h3", null, (mode === "landlord" ? "Load " : "Request load for ") + rname(st.room)),
+      el("div", "muted", "Rate: " + peso(S.rate) + " per kWh"));
+
+    // Choose how to enter the top-up
+    const seg = el("div", "seg"), sK = el("button", "on-b", "By kWh"), sP = el("button", "", "By pesos");
+    sK.type = sP.type = "button"; seg.append(sK, sP);
+
     const chips = el("div", "chips");
-    [1, 5, 10, 15, 20].forEach(k => {
-      const b = el("button", "chip", k + " kWh"); b.type = "button";
-      b.onclick = () => { st.kwh = k; [...chips.children].forEach(c => c.classList.toggle("on", c === b)); calc(); validate(); };
-      chips.append(b);
-    });
-    const comp = el("div", "comp muted", "Select an amount to see the total to pay.");
+    const row = el("div", "grid2");
+    const inp = el("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0"; inp.step = "any";
+    const unit = el("select");
+    [["kWh", "kWh"], ["Wh", "Wh"]].forEach(([v, l]) => { const o = el("option", null, l); o.value = v; unit.append(o); });
+    row.append(inp, unit);
+    const hint = el("div", "muted");
+
+    const comp = el("div", "comp muted", "Select or enter an amount to see the computation.");
     const pm = el("div"); pm.append(el("div", "muted", "Payment method"));
     const cbs = {}, refRow = el("div"), refIn = el("input");
     const payBox = mode === "tenant" ? gcashBox() : el("div"); payBox.hidden = true;
-    refIn.placeholder = "Reference number"; refIn.oninput = validate; refRow.hidden = true; refRow.append(refIn);
+    refIn.placeholder = "Reference number"; refRow.hidden = true; refRow.append(refIn);
+    const sub = el("button", null, mode === "landlord" ? "Confirm & Load" : "Send Request"); sub.disabled = true;
+    const cn = el("button", "sec", "Cancel"); cn.onclick = closeModal;
+
+    function validate() { sub.disabled = !st.kwh || (st.method === "online" && !refIn.value.trim()); }
+    refIn.oninput = validate;
+
+    function showError(msg) { comp.className = "comp"; comp.replaceChildren(el("div", "error", msg)); }
+
+    function recalc() {
+      st.kwh = null; st.amount = null;
+      const raw = parseFloat(inp.value);
+      if (!(raw > 0)) {
+        comp.className = "comp muted"; comp.replaceChildren(document.createTextNode("Select or enter an amount to see the computation."));
+        validate(); return;
+      }
+      if (st.entry === "kwh") {
+        const k = Math.round((unit.value === "Wh" ? raw / 1000 : raw) * 1000) / 1000;
+        if (k < 0.001) showError("The smallest top-up is 0.001 kWh (1 Wh).");
+        else if (k > MAX_TOPUP_KWH) showError("The largest top-up is " + MAX_TOPUP_KWH + " kWh.");
+        else {
+          st.kwh = k; st.amount = +(k * S.rate).toFixed(2);
+          comp.className = "comp";
+          comp.replaceChildren(el("div", "muted", "Computation"),
+            el("div", null, k.toFixed(3) + " kWh × " + peso(S.rate) + " per kWh"),
+            el("div", "total", "Total to pay: " + peso(st.amount)));
+        }
+      } else {
+        const p = Math.round(raw * 100) / 100, k = Math.round(p / S.rate * 1000) / 1000;
+        if (p < 1) showError("The smallest top-up is ₱1.00.");
+        else if (p > MAX_TOPUP_PESO) showError("The largest top-up is " + peso(MAX_TOPUP_PESO) + ".");
+        else if (k < 0.001) showError("That amount is too small to load.");
+        else {
+          st.kwh = k; st.amount = p;
+          comp.className = "comp";
+          comp.replaceChildren(el("div", "muted", "Computation"),
+            el("div", null, peso(p) + " ÷ " + peso(S.rate) + " per kWh"),
+            el("div", "total", "You get: " + k.toFixed(3) + " kWh"),
+            el("div", "muted", "Total to pay: " + peso(p)));
+        }
+      }
+      validate();
+    }
+
+    function setEntry(m) {
+      st.entry = m;
+      sK.className = m === "kwh" ? "on-b" : ""; sP.className = m === "peso" ? "on-b" : "";
+      unit.hidden = m !== "kwh";
+      row.style.gridTemplateColumns = m === "kwh" ? "1fr 1fr" : "1fr";
+      unit.value = "kWh"; inp.value = "";
+      inp.placeholder = m === "kwh" ? "Custom amount (e.g. 0.001)" : "Amount in pesos (e.g. 50)";
+      hint.textContent = m === "kwh" ? "Choose kWh or Wh. 1 Wh = 0.001 kWh, which is the smallest top-up."
+                                     : "Enter how many pesos you want to load. The kWh you get is computed from the rate.";
+      chips.replaceChildren();
+      (m === "kwh" ? [1, 5, 10, 15, 20] : [20, 50, 100, 200, 500]).forEach(k => {
+        const b = el("button", "chip", m === "kwh" ? k + " kWh" : "₱" + k); b.type = "button";
+        b.onclick = () => { inp.value = k; unit.value = "kWh"; [...chips.children].forEach(c => c.classList.toggle("on", c === b)); recalc(); };
+        chips.append(b);
+      });
+      recalc();
+    }
+    sK.onclick = () => setEntry("kwh");
+    sP.onclick = () => setEntry("peso");
+    inp.oninput = () => { [...chips.children].forEach(c => c.classList.remove("on")); recalc(); };
+    unit.onchange = () => { [...chips.children].forEach(c => c.classList.remove("on")); recalc(); };
+
     [["manual", "Manual payment (cash)"], ["online", "Online payment"]].forEach(([k, l]) => {
       const lab = el("label", "chk"), cb = document.createElement("input");
       cb.type = "checkbox"; cb.checked = k === st.method;
       cb.onchange = () => { st.method = k; Object.entries(cbs).forEach(([kk, c]) => c.checked = kk === k); refRow.hidden = k !== "online"; payBox.hidden = k !== "online" || mode !== "tenant"; validate(); };
       cbs[k] = cb; lab.append(cb, document.createTextNode(l)); pm.append(lab);
     });
-    const sub = el("button", null, mode === "landlord" ? "Confirm & Load" : "Send Request"); sub.disabled = true;
-    const cn = el("button", "sec", "Cancel"); cn.onclick = closeModal;
-    function calc() {
-      comp.className = "comp"; comp.replaceChildren(el("div", "muted", "Computation"),
-        el("div", null, st.kwh + " kWh × " + peso(S.rate) + " per kWh"), el("div", "total", "Total to pay: " + peso(st.kwh * S.rate)));
-    }
-    function validate() { sub.disabled = !st.kwh || (st.method === "online" && !refIn.value.trim()); }
+
     sub.onclick = async () => {
-      const amount = +(st.kwh * S.rate).toFixed(2), ref = st.method === "online" ? refIn.value.trim() : "";
-      if (mode === "landlord" && !confirm(`Add ${st.kwh} kWh to ${rname(st.room)}? Total: ${peso(amount)}`)) return;
+      if (!st.kwh) return;
+      const ref = st.method === "online" ? refIn.value.trim() : "";
+      if (mode === "landlord" && !confirm(`Add ${st.kwh.toFixed(3)} kWh to ${rname(st.room)}? Total: ${peso(st.amount)}`)) return;
       sub.disabled = true;
       try {
         if (mode === "landlord") {
-          const r = await applyLoad({ room: st.room, kwh: st.kwh, rate: S.rate, method: st.method, ref });
+          const r = await applyLoad({ room: st.room, kwh: st.kwh, rate: S.rate, amount: st.amount, method: st.method, ref });
           toast("Load saved for " + rname(st.room) + "."); showReceipt(r);
         } else {
-          await db.ref("requests/" + S.room).push({ room: S.room, kwh: st.kwh, rate: S.rate, amount, method: st.method, ref, status: "pending", ts: TS(), by: S.user.email });
+          await db.ref("requests/" + S.room).push({ room: S.room, kwh: st.kwh, rate: S.rate, amount: st.amount, method: st.method, ref, status: "pending", ts: TS(), by: S.user.email });
           closeModal(); toast("Request sent to the landlord.");
         }
       } catch (e) { toast("Failed: " + e.message, true); sub.disabled = false; }
     };
-    w.append(chips, comp, pm, payBox, refRow, sub, cn);
+
+    w.append(seg, chips, row, hint, comp, pm, payBox, refRow, sub, cn);
+    setEntry("kwh");
   }
 
   if (mode === "landlord") {
@@ -477,6 +553,7 @@ function renderRooms() {
     const pct = loaded > 0 && bal !== null ? Math.max(0, Math.min(100, bal / loaded * 100)) : 0;
     const c = el("div", "card"); c.append(el("h3", null, rname(r)), pills(ctrl, live));
     c.append(el("div", "muted", "Balance " + display(bal, 3) + " / Loaded " + display(loaded, 3) + " kWh"));
+    if (bal !== null && bal <= ZERO_KWH) c.append(el("div", "error", "⚠️ Zero balance. Waiting for a top-up."));
     const bar = el("div", "bar"), fill = el("i"); fill.style.width = pct + "%"; if (pct <= 20) fill.style.background = "#dc2626";
     bar.append(fill); c.append(bar, readings(live)); box.append(c);
   });
@@ -500,7 +577,7 @@ function renderRequests(all) {
     ok.onclick = async () => {
       if (!confirm(r.method === "online" ? `Reference no. ${r.ref}\nDoes it match your payment record?` : "Confirm you received the manual payment?")) return;
       ok.disabled = true;
-      try { const rc = await applyLoad({ room: r.room, kwh: r.kwh, rate: r.rate, method: r.method, ref: r.ref, requestId: r.id }); toast("Request confirmed."); showReceipt(rc); }
+      try { const rc = await applyLoad({ room: r.room, kwh: r.kwh, rate: r.rate, amount: r.amount, method: r.method, ref: r.ref, requestId: r.id }); toast("Request confirmed."); showReceipt(rc); }
       catch (e) { toast("Failed: " + e.message, true); ok.disabled = false; }
     };
     no.onclick = async () => {
@@ -528,8 +605,9 @@ function getSeen() { try { return JSON.parse(localStorage.getItem("seen_" + S.us
 function setSeen(a) { try { localStorage.setItem("seen_" + S.user.uid, JSON.stringify(a.slice(-100))); } catch (e) {} }
 
 function initTenant(room) {
-  const T = { loaded: null, bal: null, cutoff: null, busy: false };
+  const T = { loaded: null, bal: null, consumed: null, cutoff: null, busy: false, wasZero: null };
   $("v-home").innerHTML = `
+  <div id="tAlert"></div>
   <div class="card">
     <h3>${rname(room)} — My Electricity</h3>
     <div id="tPills"></div>
@@ -576,8 +654,27 @@ function initTenant(room) {
     $("tBal").replaceChildren(stat("Available Balance", b === null ? "— kWh" : Math.min(b, l ?? b).toFixed(3) + " kWh"));
     $("tLoaded").replaceChildren(stat("Total Loaded", display(l, 3) + " kWh"));
   };
+
+  // Zero-balance alert. Uses loaded minus consumed so it clears right after a top-up.
+  const paintAlert = () => {
+    const l = num(T.loaded), c = num(T.consumed);
+    const eff = (l !== null && c !== null) ? l - c : (num(T.bal) ?? (l !== null && l <= 0 ? 0 : null));
+    const zero = eff !== null && eff <= ZERO_KWH;
+    const box = $("tAlert"); if (!box) return;
+    box.replaceChildren();
+    if (zero) {
+      const a = el("div", "alert");
+      a.append(el("b", null, "⚠️ Zero balance"),
+        el("div", null, "Your room's power is cut. Top up first before you can use electricity again."));
+      const b = el("button", null, "➕ Request Load"); b.onclick = () => loadFlow("tenant");
+      a.append(b); box.append(a);
+    }
+    if (zero && T.wasZero === false) toast("⚠️ Zero balance. Please top up to use electricity.", true);
+    T.wasZero = zero;
+  };
+
   watch(`rooms/${room}/ctrl`, c => {
-    c = c || {}; T.loaded = c.loaded; paintBal();
+    c = c || {}; T.loaded = c.loaded; paintBal(); paintAlert();
     T.cutoff = typeof c.cutoff === "boolean" ? c.cutoff : null;
     const on = $("btnOn"), off = $("btnOff");
     on.disabled = off.disabled = T.cutoff === null;
@@ -588,7 +685,7 @@ function initTenant(room) {
   const paintPills = () => { const r = S.rooms[room]; $("tPills").replaceChildren(pills(r.ctrl, r.live)); };
   S.rooms[room] = { ctrl: {}, live: {} };
   watch(`rooms/${room}/live`, l => {
-    l = l || {}; T.bal = firstValue(l, KEYS.bal); paintBal();
+    l = l || {}; T.bal = firstValue(l, KEYS.bal); T.consumed = l.totalConsumed; paintBal(); paintAlert();
     $("tReadings").replaceChildren(readings(l)); S.rooms[room].live = l; paintPills();
   });
   watch("requests/" + room, v => {
