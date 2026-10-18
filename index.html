@@ -1,83 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Boarding House Electricity</title>
-
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      color: #172033;
-    }
-   .balance-gauge-card {
-     background: #ffffff;
-     border-radius: 14px;
-     padding: 18px;
-     margin: 12px 0;
-     text-align: center;
-   }
-
-#balanceGaugeArc {
-  transition: stroke-dasharray 0.4s ease;
-}
-
-    header {
-      background: #123b63;
-      color: white;
-      padding: 20px;
-    }
-    main { max-width: 900px; margin: auto; padding: 18px; }
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px #0000000c;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 7px 0;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 16px;
-    }
-    button {
-      background: #1769aa;
-      color: white;
-      border: 0;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:disabled { opacity: .5; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .value { font-size: 23px; font-weight: bold; }
-    .muted { color: #64748b; font-size: 13px; }
-    .error { color: #b91c1c; }
-    .success { color: #166534; }
-    pre {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      background: #f8fafc;
-      padding: 10px;
-      border-radius: 8px;
-    }
-    [hidden] { display: none !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boarding House Electricity</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#123b63;--blue:#1769aa;--green:#159a72;--red:#dc2626;--bg:#f1f5f9;--mut:#64748b}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#172033;padding-bottom:84px}
+header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+header h2{margin:0;font-size:20px}header small{opacity:.85}
+#topMenu{width:44px;height:44px;margin:0;background:#ffffff22;font-size:22px;padding:0}
+main{max-width:720px;margin:auto;padding:14px}
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0000000c}
+h3{margin:0 0 8px}
+input,select,button,textarea{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #cbd5e1;font-size:16px;font-family:inherit}
+input[type=checkbox]{width:auto;margin:0 8px 0 0;transform:scale(1.3)}
+button{background:var(--blue);color:#fff;border:0;font-weight:bold;cursor:pointer}
+button.sec{background:#e2e8f0;color:#172033}button.danger{background:var(--red)}
+button:disabled{opacity:.5}
+.muted{color:var(--mut);font-size:13px}.error{color:#b91c1c}.success{color:#166534}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#f8fafc;border-radius:10px;padding:10px}.stat .l{font-size:12px;color:var(--mut)}.stat .v{font-size:18px;font-weight:bold}
+.value{font-size:22px;font-weight:bold}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:bold;margin:0 6px 6px 0;color:#fff;background:var(--mut)}
+.pill.g{background:var(--green)}.pill.r{background:var(--red)}
+.bar{height:10px;background:#dbe3ed;border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--green)}
+.item{border-bottom:1px solid #e2e8f0;padding:10px 0;cursor:pointer}.item:last-child{border:0}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{background:#e2e8f0;color:#172033;margin:0}.chip.on{background:var(--blue);color:#fff}
+.comp{background:#f8fafc;border-radius:10px;padding:12px;margin:10px 0}.total{font-size:20px;font-weight:bold;color:var(--navy)}
+.chk{display:flex;align-items:center;padding:8px 0;font-size:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{margin:0;background:#e2e8f0;color:#172033}.seg button.on-g{background:var(--green);color:#fff}.seg button.on-r{background:var(--red);color:#fff}
+.pw{position:relative}.pw input{padding-right:50px}
+.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:42px;height:42px;margin:0;padding:0;background:none;color:var(--mut)}
+#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #cbd5e1;z-index:5}
+#tabs button{background:none;color:var(--mut);margin:0;border-radius:0;border:0;padding:10px 4px;font-size:12px}
+#tabs button.on{color:var(--blue)}#tabs span{display:block;font-size:22px}
+.overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{background:#fff;width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
+.menuitem{background:none;color:#172033;text-align:left;border-bottom:1px solid #e2e8f0;border-radius:0;margin:0;padding:15px 6px}
+#toasts{position:fixed;top:10px;left:10px;right:10px;z-index:20;pointer-events:none}
+.toast{background:#123b63;color:#fff;padding:12px 14px;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 12px #0004}.toast.err{background:var(--red)}
+.stars button{width:auto;display:inline-block;background:none;font-size:34px;color:#cbd5e1;padding:0 4px}.stars button.on{color:#f59e0b}
+.rc{font-family:monospace;font-size:14px}.rc div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #cbd5e1}.rc span:last-child{text-align:right;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+</style>
 </head>
-
 <body>
 <header>
-  <h2>Boarding House Electricity</h2>
-  <div>Prepaid Energy Monitoring System</div>
+  <div><h2>Boarding House Electricity</h2><small>Prepaid Energy Monitoring System</small></div>
+  <button id="topMenu" hidden aria-label="Menu">☰</button>
 </header>
 
 <main>
@@ -85,162 +59,46 @@
     <h3>Account Login</h3>
     <p class="muted">Sign in using your registered Firebase account.</p>
     <form id="loginForm">
-      <input id="email" type="email" placeholder="Email address"
-             autocomplete="username" required>
-      <input id="password" type="password" placeholder="Password"
-             autocomplete="current-password" required>
+      <input id="email" type="email" placeholder="Email address" autocomplete="username" required>
+      <div class="pw">
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button type="button" id="togglePw" aria-label="Show password">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            <line id="eyeSlash" x1="3" y1="3" x2="21" y2="21" hidden/>
+          </svg>
+        </button>
+      </div>
       <button type="submit">Login</button>
     </form>
     <p id="loginMessage" role="status"></p>
   </section>
 
-  <section id="dashboard" hidden>
-    <div class="card">
-      <h3 id="welcome">Dashboard</h3>
-      <div id="accountInfo" class="muted"></div>
-      <p id="statusMessage" role="status"></p>
-      <button id="logoutButton">Logout</button>
-    </div>
-
-    <section id="landlordPanel" hidden>
-      <div class="card">
-        <h3>Landlord — Load Electricity</h3>
-        <label for="roomSelect">Select room</label>
-        <select id="roomSelect">
-          <option value="room1">Room 1</option>
-          <option value="room2">Room 2</option>
-          <option value="room3">Room 3</option>
-        </select>
-
-        <label for="loadAmount">Top-up amount (kWh, 1–20)</label>
-        <input id="loadAmount" type="number" min="1" max="20"
-               step="1" value="1" required>
-
-        <button id="loadButton">Add Electricity Credit</button>
-        <p class="muted">
-          This adds to the existing cumulative loaded value.
-          Confirm the room and amount before loading.
-        </p>
-      </div>
-
-      <h3>All Rooms</h3>
-      <div id="landlordRooms" class="grid"></div>
-    </section>
-
-    <section id="tenantPanel" hidden>
-      <div class="card">
-        <h3 id="tenantRoomTitle">My Room</h3>
-        <div class="grid">
-          <div>
-            <div class="muted">Total Loaded</div>
-            <div id="tenantLoaded" class="value">—</div>
-            <div>kWh</div>
-          </div>
-          <div class="balance-gauge-card">
-  <div class="muted">AVAILABLE / TOTAL LOADED</div>
-
-  <svg viewBox="0 0 320 185"
-       role="img"
-       aria-label="Available electricity balance compared with total loaded electricity"
-       style="width:100%;max-width:360px;display:block;margin:auto">
-
-    <path
-      d="M 40 150 A 120 120 0 0 1 280 150"
-      fill="none"
-      stroke="#dbe3ed"
-      stroke-width="20"
-      stroke-linecap="round"
-    />
-
-    <path
-      id="balanceGaugeArc"
-      d="M 40 150 A 120 120 0 0 1 280 150"
-      fill="none"
-      stroke="#159a72"
-      stroke-width="20"
-      stroke-linecap="round"
-      pathLength="100"
-      stroke-dasharray="0 100"
-    />
-
-    <text
-      id="balanceGaugeRatio"
-      x="160" y="100"
-      text-anchor="middle"
-      font-size="30"
-      font-weight="bold"
-      fill="currentColor">— / —</text>
-
-    <text
-      x="160" y="124"
-      text-anchor="middle"
-      font-size="13"
-      fill="currentColor">kWh</text>
-
-    <text
-      x="40" y="177"
-      text-anchor="middle"
-      font-size="12"
-      fill="currentColor">0</text>
-
-    <text
-      id="balanceGaugeMax"
-      x="280" y="177"
-      text-anchor="middle"
-      font-size="12"
-      fill="currentColor">— kWh</text>
-  </svg>
-
-  <div class="grid">
-    <div>
-      <div class="muted">Available Balance</div>
-      <div id="tenantBalance" class="value">— kWh</div>
-    </div>
-    <div>
-      <div class="muted">Cumulative Loaded</div>
-      <div id="tenantLoadedGauge" class="value">— kWh</div>
-    </div>
-  </div>
-</div>
-          <div>
-            <div class="muted">Cutoff</div>
-<div id="tenantCutoff" class="value">—</div>
-<button id="tenantCutoffButton" type="button" disabled>
-  Waiting for Firebase...
-</button>
-<p class="muted">
-  Cutoff ON = manually turn the room power OFF.
-  Cutoff OFF = allow power if balance and safety checks pass.
-</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Electricity Readings</h3>
-        <div class="grid">
-          <div>Voltage <div id="tenantVoltage" class="value">—</div></div>
-          <div>Current <div id="tenantCurrent" class="value">—</div></div>
-          <div>Power <div id="tenantPower" class="value">—</div></div>
-          <div>Total Energy <div id="tenantEnergy" class="value">—</div></div>
-          <div>Room Status <div id="tenantActive" class="value">—</div></div>
-        </div>
-        <p class="muted">
-          Readings depend on the field names currently stored in Firebase.
-        </p>
-      </div>
-    </section>
+  <section id="app" hidden>
+    <p id="statusMessage" role="status" class="muted"></p>
+    <div id="v-home" class="view"></div>
+    <div id="v-profile" class="view" hidden></div>
+    <div id="v-history" class="view" hidden></div>
+    <div id="v-settings" class="view" hidden></div>
+    <div id="v-rate" class="view" hidden></div>
   </section>
 </main>
 
-<!-- Firebase Web SDK: compatibility version for a simple HTML page -->
+<nav id="tabs" hidden>
+  <button data-tab="profile"><span>👤</span>Profile</button>
+  <button data-tab="history"><span>🧾</span>History</button>
+  <button data-tab="menu"><span>☰</span>Menu</button>
+</nav>
+<div id="menuSheet" class="overlay" hidden><div class="sheet" id="menuBody"></div></div>
+<div id="modal" class="overlay" hidden><div class="sheet" id="modalBody"></div></div>
+<div id="toasts"></div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
-  // REPLACE these values with your Firebase Web App configuration.
- const firebaseConfig = {
+  
+const firebaseConfig = {
   apiKey: "AIzaSyDcnmLmL5sYGGzf8A_C2aF30G55gh14oPY",
   authDomain: "iot-based-eload-monitoring.firebaseapp.com",
   databaseURL: "https://iot-based-eload-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -249,427 +107,454 @@
   messagingSenderId: "686140232081",
   appId: "1:686140232081:web:a1ec0d1e8be8813d1dca30"
 };
+  
+const LANDLORD_EMAIL = "njl022326@gmail.com";
+const TENANT_ROOMS = {
+  "room1access@gmail.com": "room1",
+  "room02access@gmail.com": "room2",
+  "room003access@gmail.com": "room3"
+};
+const ROOMS = ["room1", "room2", "room3"];
+const KEYS = {
+  bal: ["balance", "remainingKwh", "remaining_kwh"],
+  v: ["voltage", "Voltage"], i: ["current", "Current"], p: ["power", "Power"],
+  pf: ["pf", "powerFactor", "power_factor", "PF"],
+  e: ["totalEnergy", "total_kwh", "energy"], st: ["status", "active", "online"]
+};
 
-  // Display routing only. Database Rules must enforce real permissions.
-  const LANDLORD_EMAIL = "njl022326@gmail.com";
+const $ = id => document.getElementById(id);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
+const S = { user: null, role: null, room: null, rate: null, receipts: [], rooms: {} };
+let auth, db, listeners = [], seenReq = null;
 
-  const TENANT_ROOMS = {
-    "room1access@gmail.com": "room1",
-    "room02access@gmail.com": "room2",
-    "room003access@gmail.com": "room3"
-  };
+const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v))) ? null : Number(v);
+const display = (v, d = 2) => { const n = num(v); return n === null ? "—" : n.toFixed(d); };
+const peso = n => "₱" + Number(n).toFixed(2);
+const fdate = ts => ts ? new Date(ts).toLocaleString() : "—";
+const rname = r => r.replace("room", "Room ");
+const firstValue = (o, keys) => { for (const k of keys) if (o && o[k] !== undefined && o[k] !== null) return o[k]; return null; };
+const TS = () => firebase.database.ServerValue.TIMESTAMP;
 
-  const $ = id => document.getElementById(id);
-  let auth;
-  let db;
-  let activeRoom = null;
-  let listeners = [];
-  let isLandlord = false;
-  let tenantCutoffState = false;
-  let tenantCutoffKnown = false;
-  let tenantCutoffBusy = false;
-
-  function showMessage(id, message, isError = false) {
-    const el = $(id);
-    el.textContent = message;
-    el.className = isError ? "error" : "success";
-  }
-
-  function display(value, digits = 2) {
-    if (value === null || value === undefined || value === "") return "—";
-    const n = Number(value);
-    return Number.isFinite(n) ? n.toFixed(digits) : String(value);
-  }
-
-  let tenantLoadedValue = null
-
-  function updateBalanceGauge(balanceValue, loadedValue) {
-  const balance = Number(balanceValue);
-  const loaded = Number(loadedValue);
-
-  const validBalance =
-    balanceValue !== null &&
-    balanceValue !== undefined &&
-    balanceValue !== "" &&
-    Number.isFinite(balance) &&
-    balance >= 0;
-
-  const validLoaded =
-    loadedValue !== null &&
-    loadedValue !== undefined &&
-    loadedValue !== "" &&
-    Number.isFinite(loaded) &&
-    loaded > 0;
-
-  const arc = $("balanceGaugeArc");
-
-  if (!validBalance || !validLoaded) {
-    $("balanceGaugeRatio").textContent = "— / —";
-    $("tenantBalance").textContent = "— kWh";
-    $("tenantLoadedGauge").textContent = "— kWh";
-    $("balanceGaugeMax").textContent = "— kWh";
-    arc.setAttribute("stroke-dasharray", "0 100");
-    return;
-  }
-
-  const safeBalance = Math.min(balance, loaded);
-  const percentage = (safeBalance / loaded) * 100;
-
-  $("balanceGaugeRatio").textContent =
-    safeBalance.toFixed(2) + " / " + loaded.toFixed(2);
-
-  $("tenantBalance").textContent =
-    safeBalance.toFixed(2) + " kWh";
-
-  $("tenantLoadedGauge").textContent =
-    loaded.toFixed(2) + " kWh";
-
-  $("balanceGaugeMax").textContent =
-    loaded.toFixed(2) + " kWh";
-
-  arc.setAttribute(
-    "stroke-dasharray",
-    percentage + " 100"
-  );
-
-  arc.setAttribute(
-    "stroke",
-    percentage <= 20 ? "#dc2626" : "#159a72"
-  );
+function showMessage(id, m, err = false) { const e = $(id); e.textContent = m; e.className = err ? "error" : "success"; }
+function toast(m, err = false) {
+  const t = el("div", "toast" + (err ? " err" : ""), m);
+  $("toasts").appendChild(t); setTimeout(() => t.remove(), 6000);
 }
+function openModal(node) { $("modalBody").replaceChildren(node); $("modal").hidden = false; }
+function closeModal() { $("modal").hidden = true; }
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+$("menuSheet").addEventListener("click", e => { if (e.target === $("menuSheet")) $("menuSheet").hidden = true; });
 
-  function firstValue(obj, keys) {
-    for (const key of keys) {
-      if (obj && obj[key] !== undefined && obj[key] !== null) {
-        return obj[key];
-      }
-    }
-    return null;
-  }
-
-  function stopListeners() {
-    listeners.forEach(item => item.ref.off("value", item.callback));
-    listeners = [];
-  }
-
-  function watch(path, callback) {
-    const ref = db.ref(path);
-    ref.on("value", snapshot => callback(snapshot.val()),
-      error => showMessage("statusMessage", error.message, true));
-    listeners.push({ ref, callback });
-  }
-
-  function renderRoomCard(room, ctrl, live) {
-    const loaded = ctrl ? ctrl.loaded : null;
-    const balance = firstValue(live, ["balance", "remainingKwh", "remaining_kwh"]);
-    const cutoff = ctrl ? ctrl.cutoff : null;
-    const voltage = firstValue(live, ["voltage", "Voltage"]);
-    const power = firstValue(live, ["power", "Power"]);
-    const active = firstValue(live, ["active", "status", "online"]);
-
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const title = document.createElement("h3");
-    title.textContent = room.toUpperCase();
-    card.appendChild(title);
-
-    const details = document.createElement("pre");
-    details.textContent =
-      "Total loaded: " + display(loaded) + " kWh\n" +
-      "Balance: " + display(balance) + " kWh\n" +
-      "Voltage: " + display(voltage) + " V\n" +
-      "Power: " + display(power) + " W\n" +
-      "Cutoff: " +
-      (cutoff === null ? "Unknown" : (cutoff ? "ON" : "OFF")) + "\n" +
-      "Status: " + (active === null ? "Unknown" : String(active));
-    card.appendChild(details);
-
-    return card;
-  }
-
-  function showLandlord() {
-    $("landlordPanel").hidden = false;
-    $("tenantPanel").hidden = true;
-    $("welcome").textContent = "Landlord Dashboard";
-    $("accountInfo").textContent = "Monitoring: Rooms 1, 2, and 3";
-
-    const state = {};
-    ["room1", "room2", "room3"].forEach(room => {
-      state[room] = { ctrl: null, live: null };
-
-      watch("rooms/" + room + "/ctrl", value => {
-        state[room].ctrl = value || {};
-        render();
-      });
-
-      watch("rooms/" + room + "/live", value => {
-        state[room].live = value || {};
-        render();
-      });
-    });
-
-    function render() {
-      const container = $("landlordRooms");
-      container.replaceChildren();
-
-      ["room1", "room2", "room3"].forEach(room => {
-        container.appendChild(
-          renderRoomCard(room, state[room].ctrl, state[room].live)
-        );
-      });
-    }
-  }
-
-function showTenant(room) {
-  activeRoom = room;
-  tenantCutoffKnown = false;
-  tenantCutoffBusy = false;
-
-  // Store the latest cumulative loaded value from Firebase
-  let tenantLoadedValue = null;
-  let tenantBalanceValue = null;
-
-  $("landlordPanel").hidden = true;
-  $("tenantPanel").hidden = false;
-  $("welcome").textContent = "Tenant Dashboard";
-  $("accountInfo").textContent = "Signed in for " + room.toUpperCase();
-  $("tenantRoomTitle").textContent =
-    room.toUpperCase() + " — My Electricity";
-
-  const cutoffButton = $("tenantCutoffButton");
-  cutoffButton.disabled = true;
-  cutoffButton.textContent = "Waiting for Firebase...";
-
-  // Read cumulative loaded credit and cutoff command
-  watch("rooms/" + room + "/ctrl", ctrl => {
-    ctrl = ctrl || {};
-
-    tenantLoadedValue = firstValue(ctrl, ["loaded"]);
-    $("tenantLoaded").textContent = display(tenantLoadedValue);
-
-    updateBalanceGauge(tenantBalanceValue, tenantLoadedValue);
-
-    if (typeof ctrl.cutoff === "boolean") {
-      tenantCutoffState = ctrl.cutoff;
-      tenantCutoffKnown = true;
-
-      $("tenantCutoff").textContent =
-        tenantCutoffState ? "ON — POWER OFF" : "OFF — POWER ALLOWED";
-
-      cutoffButton.disabled = tenantCutoffBusy;
-      cutoffButton.textContent = tenantCutoffState
-        ? "Turn Cutoff OFF (Restore Power)"
-        : "Turn Cutoff ON (Cut Power)";
-    } else {
-      tenantCutoffKnown = false;
-      $("tenantCutoff").textContent = "Unknown";
-      cutoffButton.disabled = true;
-      cutoffButton.textContent = "Cutoff setting unavailable";
-    }
-  });
-
-  // Read live balance and electrical readings
-  watch("rooms/" + room + "/live", live => {
-    live = live || {};
-
-    tenantBalanceValue = firstValue(
-      live,
-      ["balance", "remainingKwh", "remaining_kwh"]
-    );
-
-    updateBalanceGauge(tenantBalanceValue, tenantLoadedValue);
-
-    $("tenantVoltage").textContent =
-      display(firstValue(live, ["voltage", "Voltage"])) + " V";
-
-    $("tenantCurrent").textContent =
-      display(firstValue(live, ["current", "Current"])) + " A";
-
-    $("tenantPower").textContent =
-      display(firstValue(live, ["power", "Power"])) + " W";
-
-    $("tenantEnergy").textContent =
-      display(firstValue(live, ["totalEnergy", "total_kwh", "energy"])) + " kWh";
-
-    const active = firstValue(live, ["status", "active", "online"]);
-
-    const isActive =
-      active === true ||
-      active === 1 ||
-      active === "1" ||
-      active === "true";
-
-    $("tenantActive").textContent =
-      active === null
-        ? "UNKNOWN"
-        : (isActive ? "ACTIVE" : "INACTIVE");
-  });
-}
-
-$("tenantCutoffButton").addEventListener("click", async () => {
-  if (!auth || !auth.currentUser || !activeRoom ||
-      !tenantCutoffKnown || tenantCutoffBusy) {
-    return;
-  }
-
-  const nextCutoff = !tenantCutoffState;
-
-  const actionText = nextCutoff
-    ? "turn OFF electricity"
-    : "allow electricity to turn ON";
-
-  if (!confirm("Do you want to " + actionText + " for " +
-      activeRoom.toUpperCase() + "?")) {
-    return;
-  }
-
-  tenantCutoffBusy = true;
-  $("tenantCutoffButton").disabled = true;
-
-  try {
-    await db.ref("rooms/" + activeRoom + "/ctrl/cutoff")
-      .set(nextCutoff);
-
-    showMessage(
-      "statusMessage",
-      nextCutoff
-        ? "Cutoff command saved. Waiting for the ESP32."
-        : "Cutoff released. Power still depends on balance and safety checks."
-    );
-  } catch (error) {
-    showMessage("statusMessage", "Cutoff update failed: " + error.message, true);
-  } finally {
-    tenantCutoffBusy = false;
-    $("tenantCutoffButton").disabled = !tenantCutoffKnown;
-  }
+/* ---------- Password eye ---------- */
+$("togglePw").addEventListener("click", () => {
+  const p = $("password"), show = p.type === "password";
+  p.type = show ? "text" : "password";
+  $("eyeSlash").hidden = !show;
+  $("togglePw").setAttribute("aria-label", show ? "Hide password" : "Show password");
 });
 
-  $("loginForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    showMessage("loginMessage", "Signing in...");
+/* ---------- Firebase listeners ---------- */
+function stopListeners() { listeners.forEach(l => l.ref.off("value", l.handler)); listeners = []; seenReq = null; }
+function watch(path, cb) {
+  const ref = db.ref(path);
+  const handler = s => cb(s.val());
+  ref.on("value", handler, e => showMessage("statusMessage", e.message, true));
+  listeners.push({ ref, handler });
+}
 
-    try {
-      if (!auth) {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.database();
-      }
+/* ---------- Navigation ---------- */
+function showView(name) {
+  document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== "v-" + name);
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+  $("menuSheet").hidden = true;
+  if (name === "profile") buildProfile();
+  if (name === "history") renderHistory();
+  if (name === "settings") buildSettings();
+  if (name === "rate") buildRate();
+  window.scrollTo(0, 0);
+}
+function openMenu() {
+  const b = $("menuBody"); b.replaceChildren(el("h3", null, "Menu"));
+  [["🏠 Dashboard", "home"], ["👤 Profile", "profile"], ["⚙️ Settings", "settings"], ["🧾 History", "history"], ["⭐ Rate this app", "rate"]]
+    .forEach(([l, v]) => { const x = el("button", "menuitem", l); x.onclick = () => showView(v); b.append(x); });
+  const lo = el("button", "menuitem", "🚪 Logout"); lo.style.color = "#b91c1c"; lo.onclick = logout; b.append(lo);
+  $("menuSheet").hidden = false;
+}
+$("topMenu").addEventListener("click", openMenu);
+document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => {
+  b.dataset.tab === "menu" ? openMenu() : showView(b.dataset.tab);
+}));
 
-      await auth.signInWithEmailAndPassword(
-        $("email").value.trim(),
-        $("password").value
-      );
-    } catch (error) {
-      showMessage("loginMessage", error.message, true);
-    }
+/* ---------- Profile / Settings / Rate ---------- */
+function buildProfile() {
+  const v = $("v-profile"), c = el("div", "card");
+  c.append(el("h3", null, "Profile"));
+  [["Email", S.user.email], ["Role", S.role === "landlord" ? "Landlord" : "Tenant"]].concat(S.room ? [["Room", rname(S.room)]] : [])
+    .forEach(([l, x]) => { const s = el("div", "stat"); s.style.marginBottom = "8px"; s.append(el("div", "l", l), el("div", "v", x)); s.lastChild.style.fontSize = "16px"; s.lastChild.style.overflowWrap = "anywhere"; c.append(s); });
+  const lo = el("button", "danger", "Logout"); lo.onclick = logout; c.append(lo);
+  v.replaceChildren(c);
+}
+function buildSettings() {
+  const v = $("v-settings"), c = el("div", "card");
+  c.append(el("h3", null, "Settings"), el("label", "muted", "Electricity rate (₱ per kWh)"));
+  const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "0.01"; inp.value = S.rate ?? "";
+  c.append(inp);
+  if (S.role === "landlord") {
+    const b = el("button", null, "Save Rate");
+    b.onclick = async () => {
+      const r = Number(inp.value);
+      if (!Number.isFinite(r) || r <= 0) return toast("Enter a valid rate.", true);
+      try { await db.ref("settings/rate").set(r); toast("Rate saved: " + peso(r) + " per kWh."); }
+      catch (e) { toast("Save failed: " + e.message, true); }
+    };
+    c.append(b, el("p", "muted", "This rate is used to compute the amount to pay for every load."));
+  } else {
+    inp.disabled = true;
+    c.append(el("p", "muted", "View only. Only the landlord can edit the electricity rate."));
+  }
+  v.replaceChildren(c);
+}
+async function buildRate() {
+  const v = $("v-rate"), c = el("div", "card"); let stars = 0;
+  c.append(el("h3", null, "Rate this app"));
+  const row = el("div", "stars"), btns = [];
+  for (let i = 1; i <= 5; i++) {
+    const b = el("button", null, "★"); b.type = "button";
+    b.onclick = () => { stars = i; btns.forEach((x, j) => x.classList.toggle("on", j < i)); };
+    btns.push(b); row.append(b);
+  }
+  const ta = el("textarea"); ta.rows = 3; ta.placeholder = "Comments (optional)";
+  const sub = el("button", null, "Submit Rating");
+  sub.onclick = async () => {
+    if (!stars) return toast("Tap a star first.", true);
+    try { await db.ref("ratings/" + S.user.uid).set({ stars, comment: ta.value.trim(), email: S.user.email, ts: TS() }); toast("Thank you for your rating!"); }
+    catch (e) { toast("Failed: " + e.message, true); }
+  };
+  c.append(row, ta, sub); v.replaceChildren(c);
+  try {
+    const s = await db.ref("ratings/" + S.user.uid).once("value"), r = s.val();
+    if (r) { stars = r.stars; btns.forEach((x, j) => x.classList.toggle("on", j < stars)); ta.value = r.comment || ""; }
+  } catch (e) {}
+}
+
+/* ---------- Receipts / History ---------- */
+function showReceipt(r) {
+  const w = el("div"); w.append(el("h3", null, "🧾 Receipt"));
+  const rc = el("div", "rc");
+  [["Receipt No.", (r.id || "").slice(-8).toUpperCase()], ["Date", fdate(r.ts)], ["Room", rname(r.room)],
+   ["Loaded", r.kwh + " kWh"], ["Computation", r.kwh + " kWh × " + peso(r.rate)], ["Total Paid", peso(r.amount)],
+   ["Payment", r.method === "online" ? "Online payment" : "Manual payment"]]
+    .concat(r.method === "online" ? [["Reference No.", r.ref]] : [])
+    .forEach(([l, x]) => { const d = el("div"); d.append(el("span", null, l), el("span", null, x)); rc.append(d); });
+  const ok = el("button", null, "Close"); ok.onclick = closeModal;
+  w.append(rc, ok); openModal(w);
+}
+function renderHistory() {
+  const v = $("v-history"), c = el("div", "card");
+  c.append(el("h3", null, "Load History"));
+  const list = S.receipts.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  if (!list.length) c.append(el("p", "muted", "No receipts yet."));
+  list.forEach(r => {
+    const it = el("div", "item");
+    it.append(el("b", null, rname(r.room) + " · " + r.kwh + " kWh · " + peso(r.amount)), el("div", "muted", fdate(r.ts) + " · " + (r.method === "online" ? "Online" : "Manual")));
+    it.onclick = () => showReceipt(r); c.append(it);
   });
+  v.replaceChildren(c);
+}
+function flattenReceipts(val, perRoom) {
+  const out = [];
+  const add = (room, m) => Object.entries(m || {}).forEach(([id, r]) => out.push({ id, room, ...r }));
+  if (perRoom) add(perRoom, val); else Object.entries(val || {}).forEach(([room, m]) => add(room, m));
+  return out;
+}
 
-  function startDashboard(user) {
-    stopListeners();
-    $("loginPanel").hidden = true;
-    $("dashboard").hidden = false;
-    showMessage("statusMessage", "Signed in. Loading Firebase data...");
+/* ---------- Load flow (landlord loads / tenant requests) ---------- */
+async function applyLoad({ room, kwh, rate, method, ref, requestId }) {
+  if (requestId) {
+    const claim = await db.ref(`requests/${room}/${requestId}/status`).transaction(s => s === "pending" ? "processing" : undefined);
+    if (!claim.committed) throw new Error("This request was already handled.");
+  }
+  const res = await db.ref(`rooms/${room}/ctrl/loaded`).transaction(c => {
+    const o = Number(c || 0); if (!Number.isFinite(o) || o < 0) return; return o + kwh;
+  });
+  if (!res.committed) throw new Error("Top-up not committed. Check Firebase Rules.");
+  const rr = db.ref(`receipts/${room}`).push();
+  await rr.set({ room, kwh, rate, amount: +(kwh * rate).toFixed(2), method, ref: ref || "", ts: TS(), by: S.user.email });
+  if (requestId) await db.ref(`requests/${room}/${requestId}`).update({ status: "confirmed", receiptId: rr.key, confirmedTs: TS() });
+  const snap = await rr.once("value");
+  return { id: rr.key, ...snap.val() };
+}
 
-    const email = (user.email || "").toLowerCase();
-    isLandlord = email === LANDLORD_EMAIL.toLowerCase();
+function loadFlow(mode) {
+  if (!(S.rate > 0)) return toast(mode === "landlord" ? "Set the rate per kWh in Settings first." : "The landlord has not set the rate yet.", true);
+  const w = el("div"), st = { room: S.room, kwh: null, method: "manual" };
 
-    if (isLandlord) {
-      showLandlord();
-      showMessage("statusMessage", "Landlord dashboard connected.");
-      return;
+  function step2() {
+    w.replaceChildren();
+    w.append(el("h3", null, (mode === "landlord" ? "Load " : "Request load for ") + rname(st.room)), el("div", "muted", "Choose top-up amount"));
+    const chips = el("div", "chips");
+    [1, 5, 10, 15, 20].forEach(k => {
+      const b = el("button", "chip", k + " kWh"); b.type = "button";
+      b.onclick = () => { st.kwh = k; [...chips.children].forEach(c => c.classList.toggle("on", c === b)); calc(); validate(); };
+      chips.append(b);
+    });
+    const comp = el("div", "comp muted", "Select an amount to see the total to pay.");
+    const pm = el("div"); pm.append(el("div", "muted", "Payment method"));
+    const cbs = {}, refRow = el("div"), refIn = el("input");
+    refIn.placeholder = "Reference number"; refIn.oninput = validate; refRow.hidden = true; refRow.append(refIn);
+    [["manual", "Manual payment (cash)"], ["online", "Online payment"]].forEach(([k, l]) => {
+      const lab = el("label", "chk"), cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = k === st.method;
+      cb.onchange = () => { st.method = k; Object.entries(cbs).forEach(([kk, c]) => c.checked = kk === k); refRow.hidden = k !== "online"; validate(); };
+      cbs[k] = cb; lab.append(cb, document.createTextNode(l)); pm.append(lab);
+    });
+    const sub = el("button", null, mode === "landlord" ? "Confirm & Load" : "Send Request"); sub.disabled = true;
+    const cn = el("button", "sec", "Cancel"); cn.onclick = closeModal;
+    function calc() {
+      comp.className = "comp"; comp.replaceChildren(el("div", "muted", "Computation"),
+        el("div", null, st.kwh + " kWh × " + peso(S.rate) + " per kWh"), el("div", "total", "Total to pay: " + peso(st.kwh * S.rate)));
     }
-
-    const room = TENANT_ROOMS[email];
-    if (room) {
-      showTenant(room);
-      showMessage("statusMessage", "Tenant dashboard connected.");
-      return;
-    }
-
-    stopListeners();
-    $("dashboard").hidden = true;
-    $("loginPanel").hidden = false;
-    auth.signOut();
-    showMessage(
-      "loginMessage",
-      "This email is not assigned in the dashboard code. Check the configured email mapping.",
-      true
-    );
+    function validate() { sub.disabled = !st.kwh || (st.method === "online" && !refIn.value.trim()); }
+    sub.onclick = async () => {
+      const amount = +(st.kwh * S.rate).toFixed(2), ref = st.method === "online" ? refIn.value.trim() : "";
+      if (mode === "landlord" && !confirm(`Add ${st.kwh} kWh to ${rname(st.room)}? Total: ${peso(amount)}`)) return;
+      sub.disabled = true;
+      try {
+        if (mode === "landlord") {
+          const r = await applyLoad({ room: st.room, kwh: st.kwh, rate: S.rate, method: st.method, ref });
+          toast("Load saved for " + rname(st.room) + "."); showReceipt(r);
+        } else {
+          await db.ref("requests/" + S.room).push({ room: S.room, kwh: st.kwh, rate: S.rate, amount, method: st.method, ref, status: "pending", ts: TS(), by: S.user.email });
+          closeModal(); toast("Request sent to the landlord.");
+        }
+      } catch (e) { toast("Failed: " + e.message, true); sub.disabled = false; }
+    };
+    w.append(chips, comp, pm, refRow, sub, cn);
   }
 
-  $("loadButton").addEventListener("click", async () => {
-    if (!auth || !auth.currentUser || !isLandlord) {
-      showMessage("statusMessage", "Landlord login required.", true);
-      return;
-    }
+  if (mode === "landlord") {
+    const sel = el("select");
+    ROOMS.forEach(r => { const o = el("option", null, rname(r)); o.value = r; sel.append(o); });
+    const ok = el("button", null, "OK"); ok.onclick = () => { st.room = sel.value; step2(); };
+    const cn = el("button", "sec", "Cancel"); cn.onclick = closeModal;
+    w.append(el("h3", null, "Select room"), sel, ok, cn);
+  } else step2();
+  openModal(w);
+}
 
-    const room = $("roomSelect").value;
-    const amount = Number($("loadAmount").value);
+/* ---------- Shared pieces ---------- */
+function stat(l, v) { const s = el("div", "stat"); s.append(el("div", "l", l), el("div", "v", v)); return s; }
+function isActive(v) { return v === true || v === 1 || v === "1" || v === "true"; }
+function pills(ctrl, live) {
+  const d = el("div"), cut = ctrl.cutoff, act = firstValue(live, KEYS.st);
+  d.append(
+    Object.assign(el("span", "pill " + (cut === true ? "r" : cut === false ? "g" : ""), cut === true ? "POWER OFF (Cutoff)" : cut === false ? "POWER ON" : "POWER UNKNOWN")),
+    el("span", "pill " + (act === null ? "" : isActive(act) ? "g" : "r"), act === null ? "DEVICE UNKNOWN" : isActive(act) ? "DEVICE ACTIVE" : "DEVICE INACTIVE"));
+  return d;
+}
+function readings(live) {
+  const g = el("div", "grid2");
+  g.append(stat("Voltage", display(firstValue(live, KEYS.v)) + " V"), stat("Current", display(firstValue(live, KEYS.i), 3) + " A"),
+    stat("Power", display(firstValue(live, KEYS.p)) + " W"), stat("Power Factor", display(firstValue(live, KEYS.pf))),
+    stat("Total Energy", display(firstValue(live, KEYS.e)) + " kWh"));
+  return g;
+}
 
-    if (!Number.isInteger(amount) || amount < 1 || amount > 20) {
-      showMessage("statusMessage", "Enter a whole number from 1 to 20 kWh.", true);
-      return;
-    }
+/* ---------- Landlord ---------- */
+function initLandlord() {
+  const v = $("v-home"), c = el("div", "card");
+  c.append(el("h3", null, "Landlord Dashboard"), el("div", "muted", "Monitoring: Rooms 1, 2, and 3"));
+  const b = el("button", null, "⚡ Load Electricity"); b.onclick = () => loadFlow("landlord"); c.append(b);
+  const reqBox = el("div"); reqBox.id = "reqBox";
+  const rooms = el("div"); rooms.id = "roomsBox";
+  v.replaceChildren(c, reqBox, el("h3", null, "All Rooms"), rooms);
 
-    const confirmed = confirm(
-      "Add " + amount + " kWh to " + room.toUpperCase() + "?"
-    );
-    if (!confirmed) return;
-
-    $("loadButton").disabled = true;
-
-    try {
-      const loadedRef = db.ref("rooms/" + room + "/ctrl/loaded");
-      const result = await loadedRef.transaction(current => {
-        const oldValue = Number(current || 0);
-        if (!Number.isFinite(oldValue) || oldValue < 0) return;
-        return oldValue + amount;
-      });
-
-      if (!result.committed) {
-        throw new Error("The top-up was not committed. Check Firebase Rules.");
-      }
-
-      showMessage(
-        "statusMessage",
-        "Top-up saved. New cumulative total: " +
-          Number(result.snapshot.val()).toFixed(2) + " kWh."
-      );
-    } catch (error) {
-      showMessage("statusMessage", "Top-up failed: " + error.message, true);
-    } finally {
-      $("loadButton").disabled = false;
-    }
+  ROOMS.forEach(r => {
+    S.rooms[r] = { ctrl: {}, live: {} };
+    watch(`rooms/${r}/ctrl`, x => { S.rooms[r].ctrl = x || {}; renderRooms(); });
+    watch(`rooms/${r}/live`, x => { S.rooms[r].live = x || {}; renderRooms(); });
   });
-
-  $("logoutButton").addEventListener("click", async () => {
-    stopListeners();
-    await auth.signOut();
-    $("dashboard").hidden = true;
-    $("loginPanel").hidden = false;
-    $("password").value = "";
-    showMessage("loginMessage", "Logged out.");
+  watch("requests", renderRequests);
+  watch("receipts", x => { S.receipts = flattenReceipts(x); if (!$("v-history").hidden) renderHistory(); });
+}
+function renderRooms() {
+  const box = $("roomsBox"); if (!box) return; box.replaceChildren();
+  ROOMS.forEach(r => {
+    const { ctrl, live } = S.rooms[r], loaded = num(ctrl.loaded) || 0, bal = num(firstValue(live, KEYS.bal));
+    const pct = loaded > 0 && bal !== null ? Math.max(0, Math.min(100, bal / loaded * 100)) : 0;
+    const c = el("div", "card"); c.append(el("h3", null, rname(r)), pills(ctrl, live));
+    c.append(el("div", "muted", "Balance " + display(bal) + " / Loaded " + display(loaded) + " kWh"));
+    const bar = el("div", "bar"), fill = el("i"); fill.style.width = pct + "%"; if (pct <= 20) fill.style.background = "#dc2626";
+    bar.append(fill); c.append(bar, readings(live)); box.append(c);
   });
+}
+function renderRequests(all) {
+  const box = $("reqBox"); if (!box) return; box.replaceChildren();
+  const list = [];
+  Object.entries(all || {}).forEach(([room, m]) => Object.entries(m || {}).forEach(([id, r]) => { if (r.status === "pending") list.push({ id, ...r, room }); }));
+  list.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  const ids = list.map(r => r.id);
+  if (seenReq === null) { if (ids.length) toast("🔔 " + ids.length + " pending load request(s)."); }
+  else list.filter(r => !seenReq.includes(r.id)).forEach(r => toast(`🔔 ${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`));
+  seenReq = ids;
+  if (!list.length) return;
+  const c = el("div", "card"); c.append(el("h3", null, "🔔 Load Requests (" + list.length + ")"));
+  list.forEach(r => {
+    const it = el("div", "item"); it.style.cursor = "default";
+    it.append(el("b", null, rname(r.room) + " · " + r.kwh + " kWh · " + peso(r.amount)),
+      el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual payment") + " · " + fdate(r.ts)));
+    const ok = el("button", null, "Confirm"), no = el("button", "sec", "Reject");
+    ok.onclick = async () => {
+      if (!confirm(r.method === "online" ? `Reference no. ${r.ref}\nDoes it match your payment record?` : "Confirm you received the manual payment?")) return;
+      ok.disabled = true;
+      try { const rc = await applyLoad({ room: r.room, kwh: r.kwh, rate: r.rate, method: r.method, ref: r.ref, requestId: r.id }); toast("Request confirmed."); showReceipt(rc); }
+      catch (e) { toast("Failed: " + e.message, true); ok.disabled = false; }
+    };
+    no.onclick = async () => {
+      if (!confirm("Reject this request?")) return;
+      try { await db.ref(`requests/${r.room}/${r.id}`).update({ status: "rejected" }); } catch (e) { toast("Failed: " + e.message, true); }
+    };
+    it.append(ok, no); c.append(it);
+  });
+  box.append(c);
+}
 
-  // Initialize Firebase once, then restore an existing login session.
-  try {
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.database();
+/* ---------- Tenant ---------- */
+function updateGauge(balV, loadV) {
+  const bal = num(balV), loaded = num(loadV), arc = $("gArc");
+  if (bal === null || bal < 0 || loaded === null || loaded <= 0) {
+    $("gRatio").textContent = "— / —"; $("gMax").textContent = "— kWh"; arc.setAttribute("stroke-dasharray", "0 100"); return;
+  }
+  const safe = Math.min(bal, loaded), pct = safe / loaded * 100;
+  $("gRatio").textContent = safe.toFixed(2) + " / " + loaded.toFixed(2);
+  $("gMax").textContent = loaded.toFixed(2) + " kWh";
+  arc.setAttribute("stroke-dasharray", pct + " 100");
+  arc.setAttribute("stroke", pct <= 20 ? "#dc2626" : "#159a72");
+}
+function getSeen() { try { return JSON.parse(localStorage.getItem("seen_" + S.user.uid) || "[]"); } catch (e) { return []; } }
+function setSeen(a) { try { localStorage.setItem("seen_" + S.user.uid, JSON.stringify(a.slice(-100))); } catch (e) {} }
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        startDashboard(user);
-      } else {
-        stopListeners();
-        $("dashboard").hidden = true;
-        $("loginPanel").hidden = false;
+function initTenant(room) {
+  const T = { loaded: null, bal: null, cutoff: null, busy: false };
+  $("v-home").innerHTML = `
+  <div class="card">
+    <h3>${rname(room)} — My Electricity</h3>
+    <div id="tPills"></div>
+    <div class="muted" style="text-align:center">AVAILABLE / TOTAL LOADED</div>
+    <svg viewBox="0 0 320 185" role="img" aria-label="Available balance compared with total loaded" style="width:100%;max-width:360px;display:block;margin:auto">
+      <path d="M 40 150 A 120 120 0 0 1 280 150" fill="none" stroke="#dbe3ed" stroke-width="20" stroke-linecap="round"/>
+      <path id="gArc" d="M 40 150 A 120 120 0 0 1 280 150" fill="none" stroke="#159a72" stroke-width="20" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="transition:stroke-dasharray .4s"/>
+      <text id="gRatio" x="160" y="100" text-anchor="middle" font-size="30" font-weight="bold" fill="currentColor">— / —</text>
+      <text x="160" y="124" text-anchor="middle" font-size="13" fill="currentColor">kWh</text>
+      <text x="40" y="177" text-anchor="middle" font-size="12" fill="currentColor">0</text>
+      <text id="gMax" x="280" y="177" text-anchor="middle" font-size="12" fill="currentColor">— kWh</text>
+    </svg>
+    <div class="grid2"><div id="tBal"></div><div id="tLoaded"></div></div>
+    <button id="reqLoadBtn">➕ Request Load</button>
+  </div>
+  <div id="tReq"></div>
+  <div class="card">
+    <h3>Power Control</h3>
+    <div id="tCutState" class="value">—</div>
+    <div class="seg" style="margin-top:8px">
+      <button id="btnOn" disabled>ON<br><small>Activate Power</small></button>
+      <button id="btnOff" disabled>OFF<br><small>Activate Cutoff</small></button>
+    </div>
+    <p class="muted">ON = power is allowed (if balance and safety checks pass). OFF = cutoff is activated and the room power is turned off.</p>
+  </div>
+  <div class="card"><h3>Electricity Readings</h3><div id="tReadings"></div></div>`;
+
+  $("reqLoadBtn").onclick = () => loadFlow("tenant");
+  const setCut = async next => {
+    if (T.busy || T.cutoff === null || T.cutoff === next) return;
+    if (!confirm(next ? "Activate cutoff? The room power will turn OFF." : "Activate power? The room power will turn ON if balance and safety checks pass.")) return;
+    T.busy = true;
+    try { await db.ref(`rooms/${room}/ctrl/cutoff`).set(next);
+      showMessage("statusMessage", next ? "Cutoff activated. Waiting for the ESP32." : "Power activated. It still depends on balance and safety checks."); }
+    catch (e) { showMessage("statusMessage", "Cutoff update failed: " + e.message, true); }
+    T.busy = false;
+  };
+  $("btnOn").onclick = () => setCut(false);
+  $("btnOff").onclick = () => setCut(true);
+
+  const paintBal = () => {
+    updateGauge(T.bal, T.loaded);
+    const b = num(T.bal), l = num(T.loaded);
+    $("tBal").replaceChildren(stat("Available Balance", b === null ? "— kWh" : Math.min(b, l ?? b).toFixed(2) + " kWh"));
+    $("tLoaded").replaceChildren(stat("Total Loaded", display(l) + " kWh"));
+  };
+  watch(`rooms/${room}/ctrl`, c => {
+    c = c || {}; T.loaded = c.loaded; paintBal();
+    T.cutoff = typeof c.cutoff === "boolean" ? c.cutoff : null;
+    const on = $("btnOn"), off = $("btnOff");
+    on.disabled = off.disabled = T.cutoff === null;
+    on.className = T.cutoff === false ? "on-g" : ""; off.className = T.cutoff === true ? "on-r" : "";
+    $("tCutState").textContent = T.cutoff === null ? "Unknown" : T.cutoff ? "POWER OFF — Cutoff activated" : "POWER ON — Power allowed";
+    S.rooms[room] = S.rooms[room] || { ctrl: {}, live: {} }; S.rooms[room].ctrl = c; paintPills();
+  });
+  const paintPills = () => { const r = S.rooms[room]; $("tPills").replaceChildren(pills(r.ctrl, r.live)); };
+  S.rooms[room] = { ctrl: {}, live: {} };
+  watch(`rooms/${room}/live`, l => {
+    l = l || {}; T.bal = firstValue(l, KEYS.bal); paintBal();
+    $("tReadings").replaceChildren(readings(l)); S.rooms[room].live = l; paintPills();
+  });
+  watch("requests/" + room, v => {
+    const arr = Object.entries(v || {}).map(([id, r]) => ({ id, ...r })).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    const seen = getSeen();
+    arr.forEach(r => {
+      if ((r.status === "confirmed" || r.status === "rejected") && !seen.includes(r.id)) {
+        toast(r.status === "confirmed" ? `✅ Your request for ${r.kwh} kWh was confirmed. Balance added.` : `❌ Your request for ${r.kwh} kWh was rejected.`, r.status === "rejected");
+        seen.push(r.id);
       }
     });
-  } catch (error) {
-    showMessage("loginMessage", "Firebase setup error: " + error.message, true);
+    setSeen(seen);
+    const pend = arr.filter(r => r.status === "pending" || r.status === "processing");
+    const box = $("tReq"); box.replaceChildren();
+    if (!pend.length) return;
+    const c = el("div", "card"); c.append(el("h3", null, "Pending Requests"));
+    pend.forEach(r => { const it = el("div", "item"); it.style.cursor = "default";
+      it.append(el("b", null, r.kwh + " kWh · " + peso(r.amount)), el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual") + " · Waiting for landlord")); c.append(it); });
+    box.append(c);
+  });
+  watch("receipts/" + room, x => { S.receipts = flattenReceipts(x, room); if (!$("v-history").hidden) renderHistory(); });
+}
+
+/* ---------- Auth ---------- */
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault(); showMessage("loginMessage", "Signing in...");
+  try { await auth.signInWithEmailAndPassword($("email").value.trim(), $("password").value); }
+  catch (err) { showMessage("loginMessage", err.message, true); }
+});
+function startDashboard(user) {
+  stopListeners();
+  const email = (user.email || "").toLowerCase();
+  S.user = user; S.receipts = []; S.rooms = {}; S.rate = null;
+  S.role = email === LANDLORD_EMAIL.toLowerCase() ? "landlord" : (TENANT_ROOMS[email] ? "tenant" : null);
+  S.room = TENANT_ROOMS[email] || null;
+  if (!S.role) {
+    auth.signOut();
+    showMessage("loginMessage", "This email is not assigned in the dashboard code. Check the configured email mapping.", true);
+    return;
   }
+  $("loginPanel").hidden = true; $("app").hidden = false; $("tabs").hidden = false; $("topMenu").hidden = false;
+  showMessage("statusMessage", "Connected.");
+  watch("settings/rate", r => { S.rate = num(r); if (!$("v-settings").hidden) buildSettings(); });
+  S.role === "landlord" ? initLandlord() : initTenant(S.room);
+  showView("home");
+}
+async function logout() {
+  stopListeners(); $("menuSheet").hidden = true;
+  await auth.signOut(); $("password").value = "";
+  showMessage("loginMessage", "Logged out.");
+}
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth(); db = firebase.database();
+  auth.onAuthStateChanged(user => {
+    if (user) startDashboard(user);
+    else { stopListeners(); $("app").hidden = true; $("tabs").hidden = true; $("topMenu").hidden = true; $("loginPanel").hidden = false; }
+  });
+} catch (err) { showMessage("loginMessage", "Firebase setup error: " + err.message, true); }
 </script>
 </body>
 </html>
