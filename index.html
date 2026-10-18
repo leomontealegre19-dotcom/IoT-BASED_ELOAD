@@ -31,6 +31,7 @@ button:disabled{opacity:.5}
 .bar{height:10px;background:var(--track);border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--green)}
 .item{border-bottom:1px solid var(--line);padding:10px 0;cursor:pointer}.item:last-child{border:0}
 .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chips{margin:10px 0}.seg{margin:10px 0}
 .chip{background:var(--chip);color:var(--text);margin:0}.chip.on{background:var(--blue);color:#fff}
 .comp .stat{background:var(--card);margin-top:6px}.comp{background:var(--soft);border-radius:10px;padding:12px;margin:10px 0}.total{font-size:20px;font-weight:bold;color:var(--accent)}
 .chk{display:flex;align-items:center;padding:8px 0;font-size:16px}
@@ -495,7 +496,7 @@ function loadFlow(mode) {
       } catch (e) { toast("Failed: " + e.message, true); sub.disabled = false; }
     };
 
-    w.append(seg, chips, row, hint, comp, pm, payBox, refRow, sub, cn);
+    w.append(row, hint, seg, chips, comp, pm, payBox, refRow, sub, cn);
     setEntry("kwh");
   }
 
