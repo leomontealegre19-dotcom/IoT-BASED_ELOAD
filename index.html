@@ -6,45 +6,46 @@
 <title>Boarding House Electricity</title>
 <style>
 *{box-sizing:border-box}
-:root{--navy:#123b63;--blue:#1769aa;--green:#159a72;--red:#dc2626;--bg:#f1f5f9;--mut:#64748b}
-body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#172033;padding-bottom:84px}
+:root{--navy:#123b63;--blue:#1769aa;--green:#159a72;--red:#dc2626;--bg:#f1f5f9;--mut:#64748b;--card:#fff;--text:#172033;--soft:#f8fafc;--chip:#e2e8f0;--line:#e2e8f0;--line2:#cbd5e1;--track:#dbe3ed;--accent:#123b63;--ok:#166534;--err:#b91c1c;color-scheme:light}
+:root[data-theme=dark]{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--soft:#273449;--chip:#334155;--line:#334155;--line2:#475569;--track:#334155;--mut:#94a3b8;--accent:#7cc0ff;--ok:#4ade80;--err:#f87171;color-scheme:dark}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:84px}
 header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
 header h2{margin:0;font-size:20px}header small{opacity:.85}
 #topMenu{width:44px;height:44px;margin:0;background:#ffffff22;font-size:22px;padding:0}
 main{max-width:720px;margin:auto;padding:14px}
-.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0000000c}
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0000000c}
 h3{margin:0 0 8px}
-input,select,button,textarea{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #cbd5e1;font-size:16px;font-family:inherit}
+input,select,button,textarea{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--text);font-size:16px;font-family:inherit}
 input[type=checkbox]{width:auto;margin:0 8px 0 0;transform:scale(1.3)}
 button{background:var(--blue);color:#fff;border:0;font-weight:bold;cursor:pointer}
-button.sec{background:#e2e8f0;color:#172033}button.danger{background:var(--red)}
+button.sec{background:var(--chip);color:var(--text)}button.danger{background:var(--red)}
 button:disabled{opacity:.5}
-.muted{color:var(--mut);font-size:13px}.error{color:#b91c1c}.success{color:#166534}
+.muted{color:var(--mut);font-size:13px}.error{color:var(--err)}.success{color:var(--ok)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:#f8fafc;border-radius:10px;padding:10px}.stat .l{font-size:12px;color:var(--mut)}.stat .v{font-size:18px;font-weight:bold}
+.stat{background:var(--soft);border-radius:10px;padding:10px}.stat .l{font-size:12px;color:var(--mut)}.stat .v{font-size:18px;font-weight:bold}
 .value{font-size:22px;font-weight:bold}
 .pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:bold;margin:0 6px 6px 0;color:#fff;background:var(--mut)}
 .pill.g{background:var(--green)}.pill.r{background:var(--red)}
-.bar{height:10px;background:#dbe3ed;border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--green)}
-.item{border-bottom:1px solid #e2e8f0;padding:10px 0;cursor:pointer}.item:last-child{border:0}
+.bar{height:10px;background:var(--track);border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--green)}
+.item{border-bottom:1px solid var(--line);padding:10px 0;cursor:pointer}.item:last-child{border:0}
 .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.chip{background:#e2e8f0;color:#172033;margin:0}.chip.on{background:var(--blue);color:#fff}
-.comp{background:#f8fafc;border-radius:10px;padding:12px;margin:10px 0}.total{font-size:20px;font-weight:bold;color:var(--navy)}
+.chip{background:var(--chip);color:var(--text);margin:0}.chip.on{background:var(--blue);color:#fff}
+.comp .stat{background:var(--card);margin-top:6px}.comp{background:var(--soft);border-radius:10px;padding:12px;margin:10px 0}.total{font-size:20px;font-weight:bold;color:var(--accent)}
 .chk{display:flex;align-items:center;padding:8px 0;font-size:16px}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.seg button{margin:0;background:#e2e8f0;color:#172033}.seg button.on-g{background:var(--green);color:#fff}.seg button.on-r{background:var(--red);color:#fff}
+.seg button{margin:0;background:var(--chip);color:var(--text)}.seg button.on-b{background:var(--blue);color:#fff}.seg button.on-g{background:var(--green);color:#fff}.seg button.on-r{background:var(--red);color:#fff}
 .pw{position:relative}.pw input{padding-right:50px}
 .pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:42px;height:42px;margin:0;padding:0;background:none;color:var(--mut)}
-#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid #cbd5e1;z-index:5}
+#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--line2);z-index:5}
 #tabs button{background:none;color:var(--mut);margin:0;border-radius:0;border:0;padding:10px 4px;font-size:12px}
 #tabs button.on{color:var(--blue)}#tabs span{display:block;font-size:22px}
 .overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:10}
-.sheet{background:#fff;width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
-.menuitem{background:none;color:#172033;text-align:left;border-bottom:1px solid #e2e8f0;border-radius:0;margin:0;padding:15px 6px}
+.sheet{background:var(--card);color:var(--text);width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
+.menuitem{background:none;color:var(--text);text-align:left;border-bottom:1px solid var(--line);border-radius:0;margin:0;padding:15px 6px}
 #toasts{position:fixed;top:10px;left:10px;right:10px;z-index:20;pointer-events:none}
 .toast{background:#123b63;color:#fff;padding:12px 14px;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 12px #0004}.toast.err{background:var(--red)}
-.stars button{width:auto;display:inline-block;background:none;font-size:34px;color:#cbd5e1;padding:0 4px}.stars button.on{color:#f59e0b}
-.rc{font-family:monospace;font-size:14px}.rc div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #cbd5e1}.rc span:last-child{text-align:right;overflow-wrap:anywhere}
+.stars button{width:auto;display:inline-block;background:none;font-size:34px;color:var(--line2);padding:0 4px}.stars button.on{color:#f59e0b}
+.rc{font-family:monospace;font-size:14px}.rc div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line2)}.rc span:last-child{text-align:right;overflow-wrap:anywhere}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -125,7 +126,7 @@ const KEYS = {
 
 const $ = id => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
-const S = { user: null, role: null, room: null, rate: null, receipts: [], rooms: {} };
+const S = { user: null, role: null, room: null, rate: null, gcash: {}, receipts: [], rooms: {} };
 let auth, db, listeners = [], seenReq = null;
 
 const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v))) ? null : Number(v);
@@ -145,6 +146,15 @@ function openModal(node) { $("modalBody").replaceChildren(node); $("modal").hidd
 function closeModal() { $("modal").hidden = true; }
 $("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
 $("menuSheet").addEventListener("click", e => { if (e.target === $("menuSheet")) $("menuSheet").hidden = true; });
+
+/* ---------- Theme ---------- */
+function applyTheme(t) { document.documentElement.setAttribute("data-theme", t); }
+function getTheme() {
+  try { const t = localStorage.getItem("theme"); if (t === "dark" || t === "light") return t; } catch (e) {}
+  return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function setTheme(t) { try { localStorage.setItem("theme", t); } catch (e) {} applyTheme(t); }
+applyTheme(getTheme());
 
 /* ---------- Password eye ---------- */
 $("togglePw").addEventListener("click", () => {
@@ -195,25 +205,104 @@ function buildProfile() {
   const lo = el("button", "danger", "Logout"); lo.onclick = logout; c.append(lo);
   v.replaceChildren(c);
 }
+const errMsg = e => /permission_denied|permission denied/i.test((e.code || "") + " " + (e.message || ""))
+  ? "Permission denied (" + e.message + "). Update the Firebase Rules for settings and log in as the landlord."
+  : e.message;
+const safeImg = u => typeof u === "string" && u.startsWith("data:image/");
+function fileToDataUrl(file, max = 600) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onerror = () => rej(new Error("Cannot read the image."));
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(new Error("Invalid image file."));
+      im.onload = () => {
+        const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL("image/png"));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+function gcashBox() {
+  const b = el("div", "comp"), g = S.gcash || {};
+  b.append(el("div", "muted", "Send your payment to the landlord's GCash, then enter the reference number below."));
+  if (!g.number && !safeImg(g.qr)) { b.append(el("div", null, "The landlord has not set up GCash details yet. Please ask the landlord.")); return b; }
+  if (g.name) b.append(stat("Account name", g.name));
+  if (g.number) {
+    b.append(stat("GCash number", g.number));
+    const cp = el("button", "sec", "Copy number"); cp.type = "button";
+    cp.onclick = async () => { try { await navigator.clipboard.writeText(g.number); toast("Number copied."); } catch (e) { toast("Copy failed.", true); } };
+    b.append(cp);
+  }
+  if (safeImg(g.qr)) {
+    const im = el("img"); im.src = g.qr; im.alt = "Landlord GCash QR code";
+    im.style.cssText = "width:100%;max-width:240px;display:block;margin:10px auto;border-radius:8px;background:#fff";
+    b.append(el("div", "muted", "Or scan this QR code with GCash:"), im);
+  }
+  return b;
+}
 function buildSettings() {
-  const v = $("v-settings"), c = el("div", "card");
-  c.append(el("h3", null, "Settings"), el("label", "muted", "Electricity rate (₱ per kWh)"));
+  const v = $("v-settings"), isL = S.role === "landlord";
+  const ap = el("div", "card"); ap.append(el("h3", null, "Appearance"));
+  const seg = el("div", "seg"), btns = {};
+  [["light", "☀️ Light"], ["dark", "🌙 Dark"]].forEach(([k, l]) => {
+    const b = el("button", getTheme() === k ? "on-b" : "", l); btns[k] = b;
+    b.onclick = () => { setTheme(k); Object.entries(btns).forEach(([kk, x]) => x.className = kk === k ? "on-b" : ""); };
+    seg.append(b);
+  });
+  ap.append(seg);
+
+  const c = el("div", "card");
+  c.append(el("h3", null, "Electricity Rate"), el("label", "muted", "Rate (₱ per kWh)"));
   const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "0.01"; inp.value = S.rate ?? "";
   c.append(inp);
-  if (S.role === "landlord") {
+  if (isL) {
     const b = el("button", null, "Save Rate");
     b.onclick = async () => {
       const r = Number(inp.value);
       if (!Number.isFinite(r) || r <= 0) return toast("Enter a valid rate.", true);
+      b.disabled = true;
       try { await db.ref("settings/rate").set(r); toast("Rate saved: " + peso(r) + " per kWh."); }
-      catch (e) { toast("Save failed: " + e.message, true); }
+      catch (e) { toast("Save failed: " + errMsg(e), true); }
+      b.disabled = false;
     };
     c.append(b, el("p", "muted", "This rate is used to compute the amount to pay for every load."));
   } else {
     inp.disabled = true;
     c.append(el("p", "muted", "View only. Only the landlord can edit the electricity rate."));
   }
-  v.replaceChildren(c);
+  v.replaceChildren(ap, c);
+
+  if (isL) {
+    const g = S.gcash || {}; let qr = safeImg(g.qr) ? g.qr : "";
+    const gc = el("div", "card");
+    gc.append(el("h3", null, "GCash Account"), el("div", "muted", "Shown to tenants when they request a load using online payment."));
+    const nm = el("input"); nm.placeholder = "GCash account name"; nm.value = g.name || "";
+    const no = el("input"); no.placeholder = "GCash number (09XXXXXXXXX)"; no.type = "tel"; no.value = g.number || "";
+    const prev = el("img"); prev.style.cssText = "max-width:220px;width:100%;display:block;margin:8px auto;border-radius:8px;background:#fff";
+    prev.hidden = !qr; if (qr) prev.src = qr;
+    const file = document.createElement("input"); file.type = "file"; file.accept = "image/*";
+    file.onchange = async () => {
+      if (!file.files[0]) return;
+      try { qr = await fileToDataUrl(file.files[0]); prev.src = qr; prev.hidden = false; } catch (e) { toast(e.message, true); }
+    };
+    const rm = el("button", "sec", "Remove QR"); rm.onclick = () => { qr = ""; prev.hidden = true; file.value = ""; };
+    const sv = el("button", null, "Save GCash Details");
+    sv.onclick = async () => {
+      const name = nm.value.trim(), number = no.value.replace(/[\s-]/g, "");
+      if (!name) return toast("Enter the GCash account name.", true);
+      if (!/^\+?\d{10,13}$/.test(number)) return toast("Enter a valid GCash number.", true);
+      sv.disabled = true;
+      try { await db.ref("settings/gcash").set({ name, number, qr }); toast("GCash details saved."); }
+      catch (e) { toast("Save failed: " + errMsg(e), true); }
+      sv.disabled = false;
+    };
+    gc.append(nm, no, el("div", "muted", "GCash QR code (upload a screenshot of your QR)"), file, prev, rm, sv);
+    v.append(gc);
+  }
 }
 async function buildRate() {
   const v = $("v-rate"), c = el("div", "card"); let stars = 0;
@@ -302,11 +391,12 @@ function loadFlow(mode) {
     const comp = el("div", "comp muted", "Select an amount to see the total to pay.");
     const pm = el("div"); pm.append(el("div", "muted", "Payment method"));
     const cbs = {}, refRow = el("div"), refIn = el("input");
+    const payBox = mode === "tenant" ? gcashBox() : el("div"); payBox.hidden = true;
     refIn.placeholder = "Reference number"; refIn.oninput = validate; refRow.hidden = true; refRow.append(refIn);
     [["manual", "Manual payment (cash)"], ["online", "Online payment"]].forEach(([k, l]) => {
       const lab = el("label", "chk"), cb = document.createElement("input");
       cb.type = "checkbox"; cb.checked = k === st.method;
-      cb.onchange = () => { st.method = k; Object.entries(cbs).forEach(([kk, c]) => c.checked = kk === k); refRow.hidden = k !== "online"; validate(); };
+      cb.onchange = () => { st.method = k; Object.entries(cbs).forEach(([kk, c]) => c.checked = kk === k); refRow.hidden = k !== "online"; payBox.hidden = k !== "online" || mode !== "tenant"; validate(); };
       cbs[k] = cb; lab.append(cb, document.createTextNode(l)); pm.append(lab);
     });
     const sub = el("button", null, mode === "landlord" ? "Confirm & Load" : "Send Request"); sub.disabled = true;
@@ -330,7 +420,7 @@ function loadFlow(mode) {
         }
       } catch (e) { toast("Failed: " + e.message, true); sub.disabled = false; }
     };
-    w.append(chips, comp, pm, refRow, sub, cn);
+    w.append(chips, comp, pm, payBox, refRow, sub, cn);
   }
 
   if (mode === "landlord") {
@@ -443,7 +533,7 @@ function initTenant(room) {
     <div id="tPills"></div>
     <div class="muted" style="text-align:center">AVAILABLE / TOTAL LOADED</div>
     <svg viewBox="0 0 320 185" role="img" aria-label="Available balance compared with total loaded" style="width:100%;max-width:360px;display:block;margin:auto">
-      <path d="M 40 150 A 120 120 0 0 1 280 150" fill="none" stroke="#dbe3ed" stroke-width="20" stroke-linecap="round"/>
+      <path d="M 40 150 A 120 120 0 0 1 280 150" fill="none" style="stroke:var(--track)" stroke-width="20" stroke-linecap="round"/>
       <path id="gArc" d="M 40 150 A 120 120 0 0 1 280 150" fill="none" stroke="#159a72" stroke-width="20" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="transition:stroke-dasharray .4s"/>
       <text id="gRatio" x="160" y="100" text-anchor="middle" font-size="30" font-weight="bold" fill="currentColor">— / —</text>
       <text x="160" y="124" text-anchor="middle" font-size="13" fill="currentColor">kWh</text>
@@ -529,7 +619,7 @@ $("loginForm").addEventListener("submit", async e => {
 function startDashboard(user) {
   stopListeners();
   const email = (user.email || "").toLowerCase();
-  S.user = user; S.receipts = []; S.rooms = {}; S.rate = null;
+  S.user = user; S.receipts = []; S.rooms = {}; S.rate = null; S.gcash = {};
   S.role = email === LANDLORD_EMAIL.toLowerCase() ? "landlord" : (TENANT_ROOMS[email] ? "tenant" : null);
   S.room = TENANT_ROOMS[email] || null;
   if (!S.role) {
@@ -539,7 +629,7 @@ function startDashboard(user) {
   }
   $("loginPanel").hidden = true; $("app").hidden = false; $("tabs").hidden = false; $("topMenu").hidden = false;
   showMessage("statusMessage", "Connected.");
-  watch("settings/rate", r => { S.rate = num(r); if (!$("v-settings").hidden) buildSettings(); });
+  watch("settings", x => { x = x || {}; S.rate = num(x.rate); S.gcash = x.gcash || {}; if (!$("v-settings").hidden) buildSettings(); });
   S.role === "landlord" ? initLandlord() : initTenant(S.room);
   showView("home");
 }
