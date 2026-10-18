@@ -437,17 +437,19 @@ function loadFlow(mode) {
 function stat(l, v) { const s = el("div", "stat"); s.append(el("div", "l", l), el("div", "v", v)); return s; }
 function isActive(v) { return v === true || v === 1 || v === "1" || v === "true"; }
 function pills(ctrl, live) {
-  const d = el("div"), cut = ctrl.cutoff, act = firstValue(live, KEYS.st);
+  const d = el("div"), cut = ctrl.cutoff;
+  const ts = num(live && live.ts), raw = firstValue(live, KEYS.st);
+  const act = ts !== null ? Date.now() - ts < 30000 : (raw === null ? null : isActive(raw));
   d.append(
-    Object.assign(el("span", "pill " + (cut === true ? "r" : cut === false ? "g" : ""), cut === true ? "POWER OFF (Cutoff)" : cut === false ? "POWER ON" : "POWER UNKNOWN")),
-    el("span", "pill " + (act === null ? "" : isActive(act) ? "g" : "r"), act === null ? "DEVICE UNKNOWN" : isActive(act) ? "DEVICE ACTIVE" : "DEVICE INACTIVE"));
+    el("span", "pill " + (cut === true ? "r" : cut === false ? "g" : ""), cut === true ? "POWER OFF (Cutoff)" : cut === false ? "POWER ON" : "POWER UNKNOWN"),
+    el("span", "pill " + (act === null ? "" : act ? "g" : "r"), act === null ? "DEVICE UNKNOWN" : act ? "DEVICE ACTIVE" : "DEVICE INACTIVE"));
   return d;
 }
 function readings(live) {
   const g = el("div", "grid2");
   g.append(stat("Voltage", display(firstValue(live, KEYS.v)) + " V"), stat("Current", display(firstValue(live, KEYS.i), 3) + " A"),
     stat("Power", display(firstValue(live, KEYS.p)) + " W"), stat("Power Factor", display(firstValue(live, KEYS.pf))),
-    stat("Total Energy", display(firstValue(live, KEYS.e)) + " kWh"));
+    stat("Total Energy", display(firstValue(live, KEYS.e), 3) + " kWh"));
   return g;
 }
 
@@ -474,7 +476,7 @@ function renderRooms() {
     const { ctrl, live } = S.rooms[r], loaded = num(ctrl.loaded) || 0, bal = num(firstValue(live, KEYS.bal));
     const pct = loaded > 0 && bal !== null ? Math.max(0, Math.min(100, bal / loaded * 100)) : 0;
     const c = el("div", "card"); c.append(el("h3", null, rname(r)), pills(ctrl, live));
-    c.append(el("div", "muted", "Balance " + display(bal) + " / Loaded " + display(loaded) + " kWh"));
+    c.append(el("div", "muted", "Balance " + display(bal, 3) + " / Loaded " + display(loaded, 3) + " kWh"));
     const bar = el("div", "bar"), fill = el("i"); fill.style.width = pct + "%"; if (pct <= 20) fill.style.background = "#dc2626";
     bar.append(fill); c.append(bar, readings(live)); box.append(c);
   });
@@ -517,8 +519,8 @@ function updateGauge(balV, loadV) {
     $("gRatio").textContent = "— / —"; $("gMax").textContent = "— kWh"; arc.setAttribute("stroke-dasharray", "0 100"); return;
   }
   const safe = Math.min(bal, loaded), pct = safe / loaded * 100;
-  $("gRatio").textContent = safe.toFixed(2) + " / " + loaded.toFixed(2);
-  $("gMax").textContent = loaded.toFixed(2) + " kWh";
+  $("gRatio").textContent = safe.toFixed(3) + " / " + loaded.toFixed(3);
+  $("gMax").textContent = loaded.toFixed(3) + " kWh";
   arc.setAttribute("stroke-dasharray", pct + " 100");
   arc.setAttribute("stroke", pct <= 20 ? "#dc2626" : "#159a72");
 }
@@ -571,8 +573,8 @@ function initTenant(room) {
   const paintBal = () => {
     updateGauge(T.bal, T.loaded);
     const b = num(T.bal), l = num(T.loaded);
-    $("tBal").replaceChildren(stat("Available Balance", b === null ? "— kWh" : Math.min(b, l ?? b).toFixed(2) + " kWh"));
-    $("tLoaded").replaceChildren(stat("Total Loaded", display(l) + " kWh"));
+    $("tBal").replaceChildren(stat("Available Balance", b === null ? "— kWh" : Math.min(b, l ?? b).toFixed(3) + " kWh"));
+    $("tLoaded").replaceChildren(stat("Total Loaded", display(l, 3) + " kWh"));
   };
   watch(`rooms/${room}/ctrl`, c => {
     c = c || {}; T.loaded = c.loaded; paintBal();
@@ -638,6 +640,13 @@ async function logout() {
   await auth.signOut(); $("password").value = "";
   showMessage("loginMessage", "Logged out.");
 }
+setInterval(() => {
+  if (S.role === "landlord") renderRooms();
+  else if (S.room && S.rooms[S.room] && $("tPills")) {
+    const r = S.rooms[S.room];
+    $("tPills").replaceChildren(pills(r.ctrl, r.live));
+  }
+}, 15000);
 try {
   firebase.initializeApp(firebaseConfig);
   auth = firebase.auth(); db = firebase.database();
