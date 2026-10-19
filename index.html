@@ -56,9 +56,99 @@ button:disabled{opacity:.5}
 .stars button{width:auto;display:inline-block;background:none;font-size:34px;color:var(--line2);padding:0 4px}.stars button.on{color:#f59e0b}
 .rc{font-family:monospace;font-size:14px}.rc div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line2)}.rc span:last-child{text-align:right;overflow-wrap:anywhere}
 [hidden]{display:none!important}
+
+/* ---------- Landing screen (after scanning the QR code) ---------- */
+body.has-landing{overflow:hidden}
+#landing{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;color:#fff;background:radial-gradient(130% 100% at 15% 0%,#1d74e8 0%,#0b47a8 38%,#04245f 72%,#021340 100%);transition:opacity .35s}
+#landing.out{opacity:0;pointer-events:none}
+.land-bg{position:absolute;inset:0;width:100%;height:100%}
+.land-bg .static{stroke:#4fd8ff;stroke-opacity:.16;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.land-bg .flow{stroke:#7fe6ff;stroke-opacity:.75;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:6 22;animation:landflow 2.4s linear infinite}
+@keyframes landflow{to{stroke-dashoffset:-56}}
+.land-bg .node{fill:#9be8ff;animation:landpulse 2.6s ease-in-out infinite}
+@keyframes landpulse{0%,100%{opacity:.3}50%{opacity:1}}
+.land-bg .win{fill:#ffd54a;animation:landflick 5s ease-in-out infinite}
+.land-bg .w2{animation-delay:-1.2s}.land-bg .w3{animation-delay:-2.6s}.land-bg .w4{animation-delay:-3.7s}
+@keyframes landflick{0%,100%{opacity:1}45%{opacity:.3}55%{opacity:.95}70%{opacity:.5}}
+.land-bg .arc{fill:none;stroke:#5fe0ff;stroke-width:4;stroke-linecap:round;opacity:0;animation:landarc 2.4s ease-in-out infinite}
+.land-bg .a2{animation-delay:.3s}.land-bg .a3{animation-delay:.6s}
+@keyframes landarc{0%,100%{opacity:0}30%,60%{opacity:1}}
+.bolt{position:absolute;bottom:-40px;width:18px;height:30px;fill:#ffd54a;opacity:0;animation:landrise 9s linear infinite;filter:drop-shadow(0 0 6px #ffd54a99)}
+@keyframes landrise{0%{transform:translateY(0) rotate(-8deg);opacity:0}10%{opacity:.85}90%{opacity:.5}100%{transform:translateY(-110vh) rotate(8deg);opacity:0}}
+.land-card{position:relative;width:min(380px,100%);padding:26px 22px 20px;border-radius:24px;background:rgba(4,30,90,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);box-shadow:0 20px 50px rgba(0,10,40,.45);text-align:center}
+.land-logo{width:84px;height:84px;border-radius:21px;box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 3px rgba(255,255,255,.18)}
+.land-card h1{font-size:25px;line-height:1.2;margin:14px 0 4px}
+.land-card .land-sub{margin:0 0 18px;opacity:.85;font-size:14px}
+.land-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;margin:10px 0;border-radius:14px;border:0;cursor:pointer;font-size:17px;font-weight:bold}
+.land-btn small{display:block;font-weight:normal;font-size:12px;opacity:.8;margin-top:1px}
+.land-btn .ic{font-size:26px}
+.land-btn.web{background:#fff;color:#0a3d96}
+.land-btn.app{background:#ffc928;color:#2a1c00}
+.land-help{margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.12);font-size:13px;text-align:left}
+.land-help button{background:#fff;color:#0a3d96;margin:10px 0 0;padding:10px;font-size:14px}
+.land-foot{margin:14px 0 0;font-size:11px;opacity:.65}
+@media (prefers-reduced-motion:reduce){#landing *{animation:none!important}.bolt{display:none}}
 </style>
 </head>
 <body>
+<section id="landing" aria-label="Welcome">
+  <svg class="land-bg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <g id="circuit">
+        <path d="M-10 120H70L100 150H180L210 120H300L330 90H410"/>
+        <path d="M-10 260H40L70 230H150V180H230"/>
+        <path d="M410 300H330L300 330H240V400H170"/>
+        <path d="M-10 470H90L120 500H200"/>
+        <path d="M410 520H320L290 490H230V430"/>
+        <path d="M60 -10V60L90 90V150"/>
+        <path d="M340 -10V40L310 70V120"/>
+      </g>
+    </defs>
+    <use href="#circuit" class="static"/>
+    <use href="#circuit" class="flow"/>
+    <g>
+      <circle class="node" cx="100" cy="150" r="3.5"/><circle class="node" cx="210" cy="120" r="3.5" style="animation-delay:.5s"/>
+      <circle class="node" cx="330" cy="90" r="3.5" style="animation-delay:1s"/><circle class="node" cx="70" cy="230" r="3.5" style="animation-delay:1.5s"/>
+      <circle class="node" cx="300" cy="330" r="3.5" style="animation-delay:.8s"/><circle class="node" cx="120" cy="500" r="3.5" style="animation-delay:1.9s"/>
+      <circle class="node" cx="290" cy="490" r="3.5" style="animation-delay:.3s"/><circle class="node" cx="90" cy="90" r="3.5" style="animation-delay:1.2s"/>
+    </g>
+    <!-- signal arcs pulsing above the card -->
+    <g transform="translate(200 140)">
+      <path class="arc a1" d="M-16.9 -14.1A22 22 0 0 1 16.9 -14.1"/>
+      <path class="arc a2" d="M-30.6 -25.7A40 40 0 0 1 30.6 -25.7"/>
+      <path class="arc a3" d="M-44.4 -37.3A58 58 0 0 1 44.4 -37.3"/>
+    </g>
+    <!-- row of boarding houses -->
+    <g>
+      <polygon points="0,700 55,655 110,700" fill="#0b4aa0"/><rect x="10" y="700" width="90" height="100" fill="#06307a"/>
+      <rect class="win w1" x="28" y="724" width="16" height="18"/><rect class="win w3" x="66" y="724" width="16" height="18"/>
+      <polygon points="110,680 175,628 240,680" fill="#0b4aa0"/><rect x="205" y="640" width="14" height="28" fill="#0b4aa0"/>
+      <rect x="120" y="680" width="110" height="120" fill="#06307a"/>
+      <rect class="win w2" x="138" y="704" width="18" height="20"/><rect class="win w4" x="194" y="704" width="18" height="20"/>
+      <rect class="win w3" x="138" y="750" width="18" height="20"/><rect class="win w1" x="194" y="750" width="18" height="20"/>
+      <polygon points="235,710 285,668 335,710" fill="#0b4aa0"/><rect x="245" y="710" width="80" height="90" fill="#06307a"/>
+      <rect class="win w4" x="262" y="734" width="16" height="18"/><rect class="win w2" x="298" y="734" width="16" height="18"/>
+      <polygon points="332,690 375,648 418,690" fill="#0b4aa0"/><rect x="340" y="690" width="70" height="110" fill="#06307a"/>
+      <rect class="win w1" x="352" y="714" width="16" height="18"/><rect class="win w3" x="384" y="714" width="16" height="18"/>
+    </g>
+  </svg>
+  <svg class="bolt" style="left:12%;animation-delay:0s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:30%;animation-delay:2.2s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:52%;animation-delay:4.6s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:71%;animation-delay:1.4s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:88%;animation-delay:6s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+
+  <div class="land-card">
+    <img class="land-logo" src="icon-192.png" alt="">
+    <h1>Boarding House Electricity</h1>
+    <p class="land-sub">Prepaid Energy Monitoring System</p>
+    <button type="button" class="land-btn web" id="landWeb"><span class="ic">🌐</span><span>Open using web<small>Use it now in your browser</small></span></button>
+    <button type="button" class="land-btn app" id="landApp"><span class="ic">📲</span><span>Install the app<small>Add it to your home screen</small></span></button>
+    <div class="land-help" id="landHelp" role="status" hidden></div>
+    <p class="land-foot">IoT-based Electricity Load Monitoring and Remote Cutoff</p>
+  </div>
+</section>
+<script>(function(){try{var d=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true||sessionStorage.getItem("landingDone")==="1";var l=document.getElementById("landing");if(d)l.hidden=true;else document.body.classList.add("has-landing");}catch(e){}})();</script>
 <header>
   <div><h2>Boarding House Electricity</h2><small>Prepaid Energy Monitoring System</small></div>
   <button id="topMenu" hidden aria-label="Menu">☰</button>
@@ -87,6 +177,7 @@ button:disabled{opacity:.5}
   </section>
 
   <section id="app" hidden>
+    <div id="notifPrompt"></div>
     <p id="statusMessage" role="status" class="muted"></p>
     <div id="v-home" class="view"></div>
     <div id="v-profile" class="view" hidden></div>
@@ -142,7 +233,7 @@ const KEYS = {
 
 const $ = id => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
-const S = { user: null, role: null, room: null, rate: null, gcash: {}, receipts: [], rooms: {}, pending: [], results: [], zero: false, zeroRooms: [] };
+const S = { user: null, role: null, room: null, rate: null, gcash: {}, receipts: [], rooms: {}, pending: [], results: [], zero: false, zeroRooms: [], zeroPrev: {} };
 let auth, db, listeners = [], seenReq = null;
 
 const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v))) ? null : Number(v);
@@ -292,7 +383,7 @@ function buildSettings() {
     inp.disabled = true;
     c.append(el("p", "muted", "View only. Only the landlord can edit the electricity rate."));
   }
-  v.replaceChildren(ap, c);
+  v.replaceChildren(ap, buildNotifCard(), c);
 
   if (isL) {
     const g = S.gcash || {}; let qr = safeImg(g.qr) ? g.qr : "";
@@ -542,6 +633,78 @@ function readings(live) {
   return g;
 }
 
+/* ---------- Phone notifications (sound / vibrate switches) ---------- */
+function npGet(k, def) { try { const v = localStorage.getItem("np_" + k); return v === null ? def : v === "1"; } catch (e) { return def; } }
+function npSet(k, v) { try { localStorage.setItem("np_" + k, v ? "1" : "0"); } catch (e) {} }
+const notifSupported = () => "Notification" in window && "serviceWorker" in navigator;
+
+async function notify(title, body, tag) {
+  if (!npGet("on", true)) return;
+  const sound = npGet("sound", true), vib = npGet("vibrate", true);
+  // Vibrate-only: browsers silence vibration on silent notifications, so vibrate directly while the app is open.
+  if (vib && !sound && navigator.vibrate && document.visibilityState === "visible") navigator.vibrate([200, 100, 200]);
+  if (!notifSupported() || Notification.permission !== "granted") return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const opts = { body, tag: tag || "eload", renotify: true, icon: "icon-192.png", badge: "icon-192.png", data: { url: "./" } };
+    if (sound) { opts.silent = false; opts.vibrate = vib ? [200, 100, 200, 100, 300] : []; }
+    else opts.silent = true;              // silent notifications cannot carry a vibrate pattern
+    await reg.showNotification(title, opts);
+  } catch (e) {}
+}
+
+async function askNotifPermission() {
+  if (!notifSupported()) { toast("This browser does not support phone notifications.", true); return "unsupported"; }
+  let p = Notification.permission;
+  if (p === "default") { try { p = await Notification.requestPermission(); } catch (e) {} }
+  if (p === "granted") toast("Phone notifications are on.");
+  else if (p === "denied") toast("Notifications are blocked. Allow them in your phone settings.", true);
+  return p;
+}
+
+function checkNotifPrompt() {
+  const box = $("notifPrompt"); if (!box) return;
+  box.replaceChildren();
+  let dismissed = false; try { dismissed = sessionStorage.getItem("np_dismiss") === "1"; } catch (e) {}
+  if (!notifSupported() || Notification.permission !== "default" || dismissed) return;
+  const c = el("div", "card");
+  c.append(el("b", null, "🔔 Turn on phone notifications"),
+    el("div", "muted", "Get an alert on your phone for load requests, confirmations, and zero balance."));
+  const row = el("div", "grid2"), yes = el("button", null, "Turn on"), no = el("button", "sec", "Not now");
+  yes.onclick = async () => { await askNotifPermission(); checkNotifPrompt(); };
+  no.onclick = () => { try { sessionStorage.setItem("np_dismiss", "1"); } catch (e) {} checkNotifPrompt(); };
+  row.append(yes, no); c.append(row); box.append(c);
+}
+
+function buildNotifCard() {
+  const c = el("div", "card"); c.append(el("h3", null, "Phone Notifications"));
+  const st = el("div", "muted");
+  const paint = () => {
+    st.textContent = !notifSupported() ? "This browser does not support phone notifications."
+      : Notification.permission === "granted" ? "Allowed on this phone."
+      : Notification.permission === "denied" ? "Blocked. Allow notifications for this app in your phone settings."
+      : "Not turned on yet.";
+  };
+  paint(); c.append(st);
+  const tog = (label, key) => {
+    const lab = el("label", "chk"), cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = npGet(key, true); cb.onchange = () => npSet(key, cb.checked);
+    lab.append(cb, document.createTextNode(label)); return lab;
+  };
+  c.append(tog("Notifications on", "on"), tog("Sound", "sound"), tog("Vibrate", "vibrate"));
+  const en = el("button", null, "Allow notifications");
+  en.hidden = !notifSupported() || Notification.permission === "granted";
+  en.onclick = async () => { await askNotifPermission(); paint(); en.hidden = Notification.permission === "granted"; checkNotifPrompt(); };
+  const test = el("button", "sec", "Send test notification");
+  test.onclick = async () => {
+    if (!npGet("on", true)) return toast("Turn on \"Notifications on\" first.", true);
+    const p = await askNotifPermission(); paint();
+    if (p === "granted") notify("Boarding House Electricity", "Test notification. Your alerts will look like this.", "test");
+  };
+  c.append(en, test, el("p", "muted", "Alerts arrive while the app is open or still running in the background. Sound off makes notifications silent. Vibrate-only works while the app is open."));
+  return c;
+}
+
 /* ---------- Notifications (Alerts tab) ---------- */
 function updateBadge() {
   const n = S.pending.length + (S.role === "landlord" ? S.zeroRooms.length : (S.zero ? 1 : 0));
@@ -644,6 +807,12 @@ function initLandlord() {
 }
 function renderRooms() {
   S.zeroRooms = ROOMS.filter(r => { const b = num(firstValue((S.rooms[r] || {}).live, KEYS.bal)); return b !== null && b <= ZERO_KWH; });
+  ROOMS.forEach(r => {
+    const b = num(firstValue((S.rooms[r] || {}).live, KEYS.bal)); if (b === null) return;
+    const z = b <= ZERO_KWH;
+    if (z && S.zeroPrev[r] === false) notify("⚠️ Zero balance", rname(r) + " has no balance left. Power is cut.", "zero-" + r);
+    S.zeroPrev[r] = z;
+  });
   refreshNotifs();
   const box = $("roomsBox"); if (!box) return; box.replaceChildren();
   ROOMS.forEach(r => {
@@ -662,7 +831,10 @@ function renderRequests(all) {
   list.sort((a, b) => (a.ts || 0) - (b.ts || 0));
   const ids = list.map(r => r.id);
   if (seenReq === null) { if (ids.length) toast("🔔 " + ids.length + " pending load request(s)."); }
-  else list.filter(r => !seenReq.includes(r.id)).forEach(r => toast(`🔔 ${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`));
+  else list.filter(r => !seenReq.includes(r.id)).forEach(r => {
+    toast(`🔔 ${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`);
+    notify("New load request", `${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`, "req-" + r.id);
+  });
   seenReq = ids;
   S.pending = list;
 
@@ -759,8 +931,11 @@ function initTenant(room) {
       const b = el("button", null, "➕ Request Load"); b.onclick = () => loadFlow("tenant");
       a.append(b); box.append(a);
     }
-    if (zero && T.wasZero === false) toast("⚠️ Zero balance. Please top up to use electricity.", true);
-    T.wasZero = zero;
+    if (zero && T.wasZero === false) {
+      toast("⚠️ Zero balance. Please top up to use electricity.", true);
+      notify("⚠️ Zero balance", "Your power is cut. Top up to use electricity again.", "zero");
+    }
+    if (eff !== null) T.wasZero = zero;   // first real value is only a baseline
     S.zero = zero; refreshNotifs();
   };
 
@@ -785,6 +960,8 @@ function initTenant(room) {
     arr.forEach(r => {
       if ((r.status === "confirmed" || r.status === "rejected") && !seen.includes(r.id)) {
         toast(r.status === "confirmed" ? `✅ Your request for ${r.kwh} kWh was confirmed. Balance added.` : `❌ Your request for ${r.kwh} kWh was rejected.`, r.status === "rejected");
+        notify(r.status === "confirmed" ? "✅ Load confirmed" : "❌ Load rejected",
+          r.status === "confirmed" ? `${r.kwh} kWh was added to your balance.` : `Your request for ${r.kwh} kWh was rejected.`, "res-" + r.id);
         seen.push(r.id);
       }
     });
@@ -806,7 +983,7 @@ function startDashboard(user) {
   stopListeners();
   const email = (user.email || "").toLowerCase();
   S.user = user; S.receipts = []; S.rooms = {}; S.rate = null; S.gcash = {};
-  S.pending = []; S.results = []; S.zero = false; S.zeroRooms = [];
+  S.pending = []; S.results = []; S.zero = false; S.zeroRooms = []; S.zeroPrev = {};
   S.role = email === LANDLORD_EMAIL.toLowerCase() ? "landlord" : (TENANT_ROOMS[email] ? "tenant" : null);
   S.room = TENANT_ROOMS[email] || null;
   if (!S.role) {
@@ -820,6 +997,7 @@ function startDashboard(user) {
   S.role === "landlord" ? initLandlord() : initTenant(S.room);
   showView("home");
   updateBadge();
+  checkNotifPrompt();
 }
 async function logout() {
   stopListeners(); $("menuSheet").hidden = true;
@@ -855,6 +1033,46 @@ window.addEventListener("appinstalled", () => { deferredInstall = null; $("insta
 $("installBtn").addEventListener("click", installApp);
 if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) $("iosHint").hidden = false;
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+
+/* ---------- Landing screen logic ---------- */
+(function () {
+  const land = $("landing"); if (!land) return;
+  const help = $("landHelp");
+  function closeLanding() {
+    try { sessionStorage.setItem("landingDone", "1"); } catch (e) {}
+    land.classList.add("out"); document.body.classList.remove("has-landing");
+    setTimeout(() => { land.hidden = true; }, 360);
+  }
+  function say(text, withCopy) {
+    help.hidden = false; help.replaceChildren(document.createTextNode(text));
+    if (withCopy) {
+      const b = el("button", null, "Copy link"); b.type = "button";
+      b.onclick = async () => {
+        try { await navigator.clipboard.writeText(location.origin + location.pathname); b.textContent = "Link copied"; }
+        catch (e) { b.textContent = "Copy failed"; }
+      };
+      help.append(b);
+    }
+  }
+  $("landWeb").onclick = closeLanding;
+  $("landApp").onclick = async () => {
+    const ua = navigator.userAgent;
+    if (deferredInstall) {
+      const dp = deferredInstall; deferredInstall = null;
+      try {
+        dp.prompt();
+        const c = await dp.userChoice;
+        say(c.outcome === "accepted" ? "Installing. When it finishes, open BH Electricity from your home screen."
+                                     : "Not installed. You can still open it using the web.");
+      } catch (e) { say("Could not start the install. Use your browser menu and choose Install app."); }
+      const ib = $("installBtn"); if (ib) ib.hidden = true;
+      return;
+    }
+    if (/iphone|ipad|ipod/i.test(ua)) { say("On iPhone, open this page in Safari, tap the Share button, then choose Add to Home Screen.", false); return; }
+    if (/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|; wv\)/i.test(ua)) { say("This link opened inside another app (like Messenger). Copy the link, open it in Chrome, then tap Install the app again.", true); return; }
+    say("Tap the ⋮ menu in Chrome, then choose Install app or Add to Home screen. If the app is already installed, open it from your home screen.", true);
+  };
+})();
 </script>
 </body>
 </html>
