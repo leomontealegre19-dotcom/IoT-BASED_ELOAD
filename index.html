@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Boarding House Electricity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#123b63">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BH Electricity">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 *{box-sizing:border-box}
 :root{--navy:#123b63;--blue:#1769aa;--green:#159a72;--red:#dc2626;--bg:#f1f5f9;--mut:#64748b;--card:#fff;--text:#172033;--soft:#f8fafc;--chip:#e2e8f0;--line:#e2e8f0;--line2:#cbd5e1;--track:#dbe3ed;--accent:#123b63;--ok:#166534;--err:#b91c1c;color-scheme:light}
@@ -76,6 +82,8 @@ button:disabled{opacity:.5}
       <button type="submit">Login</button>
     </form>
     <p id="loginMessage" role="status"></p>
+    <button type="button" id="installBtn" class="sec" hidden>📲 Install app on this phone</button>
+    <p id="iosHint" class="muted" hidden>On iPhone: tap the Share button, then "Add to Home Screen".</p>
   </section>
 
   <section id="app" hidden>
@@ -197,6 +205,7 @@ function openMenu() {
   const b = $("menuBody"); b.replaceChildren(el("h3", null, "Menu"));
   [["👤 Profile", "profile"], ["⚙️ Settings", "settings"], ["🧾 History", "history"], ["⭐ Rate this app", "rate"]]
     .forEach(([l, v]) => { const x = el("button", "menuitem", l); x.onclick = () => showView(v); b.append(x); });
+  if (deferredInstall) { const ins = el("button", "menuitem", "📲 Install app"); ins.onclick = installApp; b.append(ins); }
   const lo = el("button", "menuitem", "🚪 Logout"); lo.style.color = "#b91c1c"; lo.onclick = logout; b.append(lo);
   $("menuSheet").hidden = false;
 }
@@ -832,6 +841,20 @@ try {
     else { stopListeners(); $("app").hidden = true; $("tabs").hidden = true; $("topMenu").hidden = true; $("loginPanel").hidden = false; }
   });
 } catch (err) { showMessage("loginMessage", "Firebase setup error: " + err.message, true); }
+
+/* ---------- Install as an app (PWA) ---------- */
+var deferredInstall = null;
+async function installApp() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  try { await deferredInstall.userChoice; } catch (e) {}
+  deferredInstall = null; $("installBtn").hidden = true; $("menuSheet").hidden = true;
+}
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; $("installBtn").hidden = false; });
+window.addEventListener("appinstalled", () => { deferredInstall = null; $("installBtn").hidden = true; toast("App installed."); });
+$("installBtn").addEventListener("click", installApp);
+if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) $("iosHint").hidden = false;
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </body>
 </html>
