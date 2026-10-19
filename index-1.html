@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boarding House Electricity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#123b63">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BH Electricity">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box}
+:root{--navy:#123b63;--blue:#1769aa;--green:#159a72;--red:#dc2626;--bg:#f1f5f9;--mut:#64748b;--card:#fff;--text:#172033;--soft:#f8fafc;--chip:#e2e8f0;--line:#e2e8f0;--line2:#cbd5e1;--track:#dbe3ed;--accent:#123b63;--ok:#166534;--err:#b91c1c;color-scheme:light}
+:root[data-theme=dark]{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--soft:#273449;--chip:#334155;--line:#334155;--line2:#475569;--track:#334155;--mut:#94a3b8;--accent:#7cc0ff;--ok:#4ade80;--err:#f87171;color-scheme:dark}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:84px}
+header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+header h2{margin:0;font-size:20px}header small{opacity:.85}
+#topMenu{width:44px;height:44px;margin:0;background:#ffffff22;font-size:22px;padding:0}
+main{max-width:720px;margin:auto;padding:14px}
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0000000c}
+.alert{background:var(--card);border:2px solid var(--red);border-radius:14px;padding:14px;margin-bottom:14px}
+.alert b{color:var(--err);font-size:17px}
+h3{margin:0 0 8px}
+input,select,button,textarea{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--text);font-size:16px;font-family:inherit}
+input[type=checkbox]{width:auto;margin:0 8px 0 0;transform:scale(1.3)}
+button{background:var(--blue);color:#fff;border:0;font-weight:bold;cursor:pointer}
+button.sec{background:var(--chip);color:var(--text)}button.danger{background:var(--red)}
+button:disabled{opacity:.5}
+.muted{color:var(--mut);font-size:13px}.error{color:var(--err)}.success{color:var(--ok)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--soft);border-radius:10px;padding:10px}.stat .l{font-size:12px;color:var(--mut)}.stat .v{font-size:18px;font-weight:bold}
+.value{font-size:22px;font-weight:bold}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:bold;margin:0 6px 6px 0;color:#fff;background:var(--mut)}
+.pill.g{background:var(--green)}.pill.r{background:var(--red)}
+.bar{height:10px;background:var(--track);border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--green)}
+.item{border-bottom:1px solid var(--line);padding:10px 0;cursor:pointer}.item:last-child{border:0}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.seg{margin:10px 0}
+.chip{background:var(--chip);color:var(--text);margin:0}.chip.on{background:var(--blue);color:#fff}
+.comp .stat{background:var(--card);margin-top:6px}.comp{background:var(--soft);border-radius:10px;padding:12px;margin:10px 0}.total{font-size:20px;font-weight:bold;color:var(--accent)}
+.chk{display:flex;align-items:center;padding:8px 0;font-size:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{margin:0;background:var(--chip);color:var(--text)}.seg button.on-b{background:var(--blue);color:#fff}.seg button.on-g{background:var(--green);color:#fff}.seg button.on-r{background:var(--red);color:#fff}
+.pw{position:relative}.pw input{padding-right:50px}
+.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:42px;height:42px;margin:0;padding:0;background:none;color:var(--mut)}
+#tabs{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line2);z-index:5}
+#tabs button{background:none;color:var(--mut);margin:0;border-radius:0;border:0;padding:10px 2px;font-size:12px;position:relative}
+.badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;line-height:18px;padding:0 5px;font-style:normal;font-weight:bold}
+#tabs button.on{color:var(--blue)}#tabs span{display:block;font-size:22px}
+.overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{background:var(--card);color:var(--text);width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
+.menuitem{background:none;color:var(--text);text-align:left;border-bottom:1px solid var(--line);border-radius:0;margin:0;padding:15px 6px}
+#toasts{position:fixed;top:10px;left:10px;right:10px;z-index:20;pointer-events:none}
+.toast{background:#123b63;color:#fff;padding:12px 14px;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 12px #0004}.toast.err{background:var(--red)}
+.stars button{width:auto;display:inline-block;background:none;font-size:34px;color:var(--line2);padding:0 4px}.stars button.on{color:#f59e0b}
+.rc{font-family:monospace;font-size:14px}.rc div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line2)}.rc span:last-child{text-align:right;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+
+/* ---------- Landing screen (after scanning the QR code) ---------- */
+body.has-landing{overflow:hidden}
+#landing{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;color:#fff;background:radial-gradient(130% 100% at 15% 0%,#1d74e8 0%,#0b47a8 38%,#04245f 72%,#021340 100%);transition:opacity .35s}
+#landing.out{opacity:0;pointer-events:none}
+.land-bg{position:absolute;inset:0;width:100%;height:100%}
+.land-bg .static{stroke:#4fd8ff;stroke-opacity:.16;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.land-bg .flow{stroke:#7fe6ff;stroke-opacity:.75;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:6 22;animation:landflow 2.4s linear infinite}
+@keyframes landflow{to{stroke-dashoffset:-56}}
+.land-bg .node{fill:#9be8ff;animation:landpulse 2.6s ease-in-out infinite}
+@keyframes landpulse{0%,100%{opacity:.3}50%{opacity:1}}
+.land-bg .win{fill:#ffd54a;animation:landflick 5s ease-in-out infinite}
+.land-bg .w2{animation-delay:-1.2s}.land-bg .w3{animation-delay:-2.6s}.land-bg .w4{animation-delay:-3.7s}
+@keyframes landflick{0%,100%{opacity:1}45%{opacity:.3}55%{opacity:.95}70%{opacity:.5}}
+.land-bg .arc{fill:none;stroke:#5fe0ff;stroke-width:4;stroke-linecap:round;opacity:0;animation:landarc 2.4s ease-in-out infinite}
+.land-bg .a2{animation-delay:.3s}.land-bg .a3{animation-delay:.6s}
+@keyframes landarc{0%,100%{opacity:0}30%,60%{opacity:1}}
+.bolt{position:absolute;bottom:-40px;width:18px;height:30px;fill:#ffd54a;opacity:0;animation:landrise 9s linear infinite;filter:drop-shadow(0 0 6px #ffd54a99)}
+@keyframes landrise{0%{transform:translateY(0) rotate(-8deg);opacity:0}10%{opacity:.85}90%{opacity:.5}100%{transform:translateY(-110vh) rotate(8deg);opacity:0}}
+.land-card{position:relative;width:min(380px,100%);padding:26px 22px 20px;border-radius:24px;background:rgba(4,30,90,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);box-shadow:0 20px 50px rgba(0,10,40,.45);text-align:center}
+.land-logo{width:84px;height:84px;border-radius:21px;box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 3px rgba(255,255,255,.18)}
+.land-card h1{font-size:25px;line-height:1.2;margin:14px 0 4px}
+.land-card .land-sub{margin:0 0 18px;opacity:.85;font-size:14px}
+.land-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;margin:10px 0;border-radius:14px;border:0;cursor:pointer;font-size:17px;font-weight:bold}
+.land-btn small{display:block;font-weight:normal;font-size:12px;opacity:.8;margin-top:1px}
+.land-btn .ic{font-size:26px}
+.land-btn.web{background:#fff;color:#0a3d96}
+.land-btn.app{background:#ffc928;color:#2a1c00}
+.land-help{margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.12);font-size:13px;text-align:left}
+.land-help button{background:#fff;color:#0a3d96;margin:10px 0 0;padding:10px;font-size:14px}
+.land-foot{margin:14px 0 0;font-size:11px;opacity:.65}
+@media (prefers-reduced-motion:reduce){#landing *{animation:none!important}.bolt{display:none}}
+</style>
+</head>
+<body>
+<section id="landing" aria-label="Welcome">
+  <svg class="land-bg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <g id="circuit">
+        <path d="M-10 120H70L100 150H180L210 120H300L330 90H410"/>
+        <path d="M-10 260H40L70 230H150V180H230"/>
+        <path d="M410 300H330L300 330H240V400H170"/>
+        <path d="M-10 470H90L120 500H200"/>
+        <path d="M410 520H320L290 490H230V430"/>
+        <path d="M60 -10V60L90 90V150"/>
+        <path d="M340 -10V40L310 70V120"/>
+      </g>
+    </defs>
+    <use href="#circuit" class="static"/>
+    <use href="#circuit" class="flow"/>
+    <g>
+      <circle class="node" cx="100" cy="150" r="3.5"/><circle class="node" cx="210" cy="120" r="3.5" style="animation-delay:.5s"/>
+      <circle class="node" cx="330" cy="90" r="3.5" style="animation-delay:1s"/><circle class="node" cx="70" cy="230" r="3.5" style="animation-delay:1.5s"/>
+      <circle class="node" cx="300" cy="330" r="3.5" style="animation-delay:.8s"/><circle class="node" cx="120" cy="500" r="3.5" style="animation-delay:1.9s"/>
+      <circle class="node" cx="290" cy="490" r="3.5" style="animation-delay:.3s"/><circle class="node" cx="90" cy="90" r="3.5" style="animation-delay:1.2s"/>
+    </g>
+    <!-- signal arcs pulsing above the card -->
+    <g transform="translate(200 140)">
+      <path class="arc a1" d="M-16.9 -14.1A22 22 0 0 1 16.9 -14.1"/>
+      <path class="arc a2" d="M-30.6 -25.7A40 40 0 0 1 30.6 -25.7"/>
+      <path class="arc a3" d="M-44.4 -37.3A58 58 0 0 1 44.4 -37.3"/>
+    </g>
+    <!-- row of boarding houses -->
+    <g>
+      <polygon points="0,700 55,655 110,700" fill="#0b4aa0"/><rect x="10" y="700" width="90" height="100" fill="#06307a"/>
+      <rect class="win w1" x="28" y="724" width="16" height="18"/><rect class="win w3" x="66" y="724" width="16" height="18"/>
+      <polygon points="110,680 175,628 240,680" fill="#0b4aa0"/><rect x="205" y="640" width="14" height="28" fill="#0b4aa0"/>
+      <rect x="120" y="680" width="110" height="120" fill="#06307a"/>
+      <rect class="win w2" x="138" y="704" width="18" height="20"/><rect class="win w4" x="194" y="704" width="18" height="20"/>
+      <rect class="win w3" x="138" y="750" width="18" height="20"/><rect class="win w1" x="194" y="750" width="18" height="20"/>
+      <polygon points="235,710 285,668 335,710" fill="#0b4aa0"/><rect x="245" y="710" width="80" height="90" fill="#06307a"/>
+      <rect class="win w4" x="262" y="734" width="16" height="18"/><rect class="win w2" x="298" y="734" width="16" height="18"/>
+      <polygon points="332,690 375,648 418,690" fill="#0b4aa0"/><rect x="340" y="690" width="70" height="110" fill="#06307a"/>
+      <rect class="win w1" x="352" y="714" width="16" height="18"/><rect class="win w3" x="384" y="714" width="16" height="18"/>
+    </g>
+  </svg>
+  <svg class="bolt" style="left:12%;animation-delay:0s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:30%;animation-delay:2.2s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:52%;animation-delay:4.6s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:71%;animation-delay:1.4s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+  <svg class="bolt" style="left:88%;animation-delay:6s" viewBox="0 0 12 22" aria-hidden="true"><path d="M8 0L0 12h5L3 22l9-14H7z"/></svg>
+
+  <div class="land-card">
+    <img class="land-logo" src="icon-192.png" alt="">
+    <h1>Boarding House Electricity</h1>
+    <p class="land-sub">Prepaid Energy Monitoring System</p>
+    <button type="button" class="land-btn web" id="landWeb"><span class="ic">🌐</span><span>Open using web<small>Use it now in your browser</small></span></button>
+    <button type="button" class="land-btn app" id="landApp"><span class="ic">📲</span><span>Install the app<small>Add it to your home screen</small></span></button>
+    <div class="land-help" id="landHelp" role="status" hidden></div>
+    <p class="land-foot">IoT-based Electricity Load Monitoring and Remote Cutoff</p>
+  </div>
+</section>
+<script>(function(){try{var d=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true||sessionStorage.getItem("landingDone")==="1";var l=document.getElementById("landing");if(d)l.hidden=true;else document.body.classList.add("has-landing");}catch(e){}})();</script>
+<header>
+  <div><h2>Boarding House Electricity</h2><small>Prepaid Energy Monitoring System</small></div>
+  <button id="topMenu" hidden aria-label="Menu">☰</button>
+</header>
+
+<main>
+  <section id="loginPanel" class="card">
+    <h3>Account Login</h3>
+    <p class="muted">Sign in using your registered Firebase account.</p>
+    <form id="loginForm">
+      <input id="email" type="email" placeholder="Email address" autocomplete="username" required>
+      <div class="pw">
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button type="button" id="togglePw" aria-label="Show password">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            <line id="eyeSlash" x1="3" y1="3" x2="21" y2="21" hidden/>
+          </svg>
+        </button>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <p id="loginMessage" role="status"></p>
+    <button type="button" id="installBtn" class="sec" hidden>📲 Install app on this phone</button>
+    <p id="iosHint" class="muted" hidden>On iPhone: tap the Share button, then "Add to Home Screen".</p>
+  </section>
+
+  <section id="app" hidden>
+    <div id="notifPrompt"></div>
+    <p id="statusMessage" role="status" class="muted"></p>
+    <div id="v-home" class="view"></div>
+    <div id="v-profile" class="view" hidden></div>
+    <div id="v-history" class="view" hidden></div>
+    <div id="v-notifs" class="view" hidden></div>
+    <div id="v-settings" class="view" hidden></div>
+    <div id="v-rate" class="view" hidden></div>
+  </section>
+</main>
+
+<nav id="tabs" hidden>
+  <button data-tab="home"><span>🏠</span>Dashboard</button>
+  <button data-tab="profile"><span>👤</span>Profile</button>
+  <button data-tab="history"><span>🧾</span>History</button>
+  <button data-tab="notifs"><span>🔔</span>Alerts<i class="badge" id="notifBadge" hidden>0</i></button>
+  <button data-tab="menu"><span>☰</span>Menu</button>
+</nav>
+<div id="menuSheet" class="overlay" hidden><div class="sheet" id="menuBody"></div></div>
+<div id="modal" class="overlay" hidden><div class="sheet" id="modalBody"></div></div>
+<div id="toasts"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  
+const firebaseConfig = {
+  apiKey: "AIzaSyDcnmLmL5sYGGzf8A_C2aF30G55gh14oPY",
+  authDomain: "iot-based-eload-monitoring.firebaseapp.com",
+  databaseURL: "https://iot-based-eload-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "iot-based-eload-monitoring",
+  storageBucket: "iot-based-eload-monitoring.firebasestorage.app",
+  messagingSenderId: "686140232081",
+  appId: "1:686140232081:web:a1ec0d1e8be8813d1dca30"
+};
+  
+const LANDLORD_EMAIL = "njl022326@gmail.com";
+const TENANT_ROOMS = {
+  "room1access@gmail.com": "room1",
+  "room02access@gmail.com": "room2",
+  "room003access@gmail.com": "room3"
+};
+const ROOMS = ["room1", "room2", "room3"];
+const ZERO_KWH = 0.0005;          // balance at or below this counts as zero
+const MAX_TOPUP_KWH = 500;        // safety limit for one top-up
+const MAX_TOPUP_PESO = 10000;     // safety limit for one top-up
+const KEYS = {
+  bal: ["balance", "remainingKwh", "remaining_kwh"],
+  v: ["voltage", "Voltage"], i: ["current", "Current"], p: ["power", "Power"],
+  pf: ["pf", "powerFactor", "power_factor", "PF"],
+  e: ["totalEnergy", "total_kwh", "energy"], st: ["status", "active", "online"]
+};
+
+const $ = id => document.getElementById(id);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
+const S = { user: null, role: null, room: null, rate: null, gcash: {}, receipts: [], rooms: {}, pending: [], results: [], zero: false, zeroRooms: [], zeroPrev: {} };
+let auth, db, listeners = [], seenReq = null;
+
+const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v))) ? null : Number(v);
+const display = (v, d = 2) => { const n = num(v); return n === null ? "—" : n.toFixed(d); };
+const peso = n => "₱" + Number(n).toFixed(2);
+const fdate = ts => ts ? new Date(ts).toLocaleString() : "—";
+const rname = r => r.replace("room", "Room ");
+const firstValue = (o, keys) => { for (const k of keys) if (o && o[k] !== undefined && o[k] !== null) return o[k]; return null; };
+const TS = () => firebase.database.ServerValue.TIMESTAMP;
+
+function showMessage(id, m, err = false) { const e = $(id); e.textContent = m; e.className = err ? "error" : "success"; }
+function toast(m, err = false) {
+  const t = el("div", "toast" + (err ? " err" : ""), m);
+  $("toasts").appendChild(t); setTimeout(() => t.remove(), 6000);
+}
+function openModal(node) { $("modalBody").replaceChildren(node); $("modal").hidden = false; }
+function closeModal() { $("modal").hidden = true; }
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+$("menuSheet").addEventListener("click", e => { if (e.target === $("menuSheet")) $("menuSheet").hidden = true; });
+
+/* ---------- Theme ---------- */
+function applyTheme(t) { document.documentElement.setAttribute("data-theme", t); }
+function getTheme() {
+  try { const t = localStorage.getItem("theme"); if (t === "dark" || t === "light") return t; } catch (e) {}
+  return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function setTheme(t) { try { localStorage.setItem("theme", t); } catch (e) {} applyTheme(t); }
+applyTheme(getTheme());
+
+/* ---------- Password eye ---------- */
+$("togglePw").addEventListener("click", () => {
+  const p = $("password"), show = p.type === "password";
+  p.type = show ? "text" : "password";
+  $("eyeSlash").hidden = !show;
+  $("togglePw").setAttribute("aria-label", show ? "Hide password" : "Show password");
+});
+
+/* ---------- Firebase listeners ---------- */
+function stopListeners() { listeners.forEach(l => l.ref.off("value", l.handler)); listeners = []; seenReq = null; }
+function watch(path, cb) {
+  const ref = db.ref(path);
+  const handler = s => cb(s.val());
+  ref.on("value", handler, e => showMessage("statusMessage", e.message, true));
+  listeners.push({ ref, handler });
+}
+
+/* ---------- Navigation ---------- */
+function showView(name) {
+  document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== "v-" + name);
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+  $("menuSheet").hidden = true;
+  if (name === "profile") buildProfile();
+  if (name === "history") renderHistory();
+  if (name === "notifs") renderNotifs();
+  if (name === "settings") buildSettings();
+  if (name === "rate") buildRate();
+  window.scrollTo(0, 0);
+}
+function openMenu() {
+  const b = $("menuBody"); b.replaceChildren(el("h3", null, "Menu"));
+  [["👤 Profile", "profile"], ["⚙️ Settings", "settings"], ["🧾 History", "history"], ["⭐ Rate this app", "rate"]]
+    .forEach(([l, v]) => { const x = el("button", "menuitem", l); x.onclick = () => showView(v); b.append(x); });
+  if (deferredInstall) { const ins = el("button", "menuitem", "📲 Install app"); ins.onclick = installApp; b.append(ins); }
+  const lo = el("button", "menuitem", "🚪 Logout"); lo.style.color = "#b91c1c"; lo.onclick = logout; b.append(lo);
+  $("menuSheet").hidden = false;
+}
+$("topMenu").addEventListener("click", openMenu);
+document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => {
+  b.dataset.tab === "menu" ? openMenu() : showView(b.dataset.tab);
+}));
+
+/* ---------- Profile / Settings / Rate ---------- */
+function buildProfile() {
+  const v = $("v-profile"), c = el("div", "card");
+  c.append(el("h3", null, "Profile"));
+  [["Email", S.user.email], ["Role", S.role === "landlord" ? "Landlord" : "Tenant"]].concat(S.room ? [["Room", rname(S.room)]] : [])
+    .forEach(([l, x]) => { const s = el("div", "stat"); s.style.marginBottom = "8px"; s.append(el("div", "l", l), el("div", "v", x)); s.lastChild.style.fontSize = "16px"; s.lastChild.style.overflowWrap = "anywhere"; c.append(s); });
+  const lo = el("button", "danger", "Logout"); lo.onclick = logout; c.append(lo);
+  v.replaceChildren(c);
+}
+const errMsg = e => /permission_denied|permission denied/i.test((e.code || "") + " " + (e.message || ""))
+  ? "Permission denied (" + e.message + "). Update the Firebase Rules for settings and log in as the landlord."
+  : e.message;
+const safeImg = u => typeof u === "string" && u.startsWith("data:image/");
+function fileToDataUrl(file, max = 600) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onerror = () => rej(new Error("Cannot read the image."));
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(new Error("Invalid image file."));
+      im.onload = () => {
+        const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL("image/png"));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+function gcashBox() {
+  const b = el("div", "comp"), g = S.gcash || {};
+  b.append(el("div", "muted", "Send your payment to the landlord's GCash, then enter the reference number below."));
+  if (!g.number && !safeImg(g.qr)) { b.append(el("div", null, "The landlord has not set up GCash details yet. Please ask the landlord.")); return b; }
+  if (g.name) b.append(stat("Account name", g.name));
+  if (g.number) {
+    b.append(stat("GCash number", g.number));
+    const cp = el("button", "sec", "Copy number"); cp.type = "button";
+    cp.onclick = async () => { try { await navigator.clipboard.writeText(g.number); toast("Number copied."); } catch (e) { toast("Copy failed.", true); } };
+    b.append(cp);
+  }
+  if (safeImg(g.qr)) {
+    const im = el("img"); im.src = g.qr; im.alt = "Landlord GCash QR code";
+    im.style.cssText = "width:100%;max-width:240px;display:block;margin:10px auto;border-radius:8px;background:#fff";
+    b.append(el("div", "muted", "Or scan this QR code with GCash:"), im);
+  }
+  return b;
+}
+function buildSettings() {
+  const v = $("v-settings"), isL = S.role === "landlord";
+  const ap = el("div", "card"); ap.append(el("h3", null, "Appearance"));
+  const seg = el("div", "seg"), btns = {};
+  [["light", "☀️ Light"], ["dark", "🌙 Dark"]].forEach(([k, l]) => {
+    const b = el("button", getTheme() === k ? "on-b" : "", l); btns[k] = b;
+    b.onclick = () => { setTheme(k); Object.entries(btns).forEach(([kk, x]) => x.className = kk === k ? "on-b" : ""); };
+    seg.append(b);
+  });
+  ap.append(seg);
+
+  const c = el("div", "card");
+  c.append(el("h3", null, "Electricity Rate"), el("label", "muted", "Rate (₱ per kWh)"));
+  const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "0.01"; inp.value = S.rate ?? "";
+  c.append(inp);
+  if (isL) {
+    const b = el("button", null, "Save Rate");
+    b.onclick = async () => {
+      const r = Number(inp.value);
+      if (!Number.isFinite(r) || r <= 0) return toast("Enter a valid rate.", true);
+      b.disabled = true;
+      try { await db.ref("settings/rate").set(r); toast("Rate saved: " + peso(r) + " per kWh."); }
+      catch (e) { toast("Save failed: " + errMsg(e), true); }
+      b.disabled = false;
+    };
+    c.append(b, el("p", "muted", "This rate is used to compute the amount to pay for every load."));
+  } else {
+    inp.disabled = true;
+    c.append(el("p", "muted", "View only. Only the landlord can edit the electricity rate."));
+  }
+  v.replaceChildren(ap, buildNotifCard(), c);
+
+  if (isL) {
+    const g = S.gcash || {}; let qr = safeImg(g.qr) ? g.qr : "";
+    const gc = el("div", "card");
+    gc.append(el("h3", null, "GCash Account"), el("div", "muted", "Shown to tenants when they request a load using online payment."));
+    const nm = el("input"); nm.placeholder = "GCash account name"; nm.value = g.name || "";
+    const no = el("input"); no.placeholder = "GCash number (09XXXXXXXXX)"; no.type = "tel"; no.value = g.number || "";
+    const prev = el("img"); prev.style.cssText = "max-width:220px;width:100%;display:block;margin:8px auto;border-radius:8px;background:#fff";
+    prev.hidden = !qr; if (qr) prev.src = qr;
+    const file = document.createElement("input"); file.type = "file"; file.accept = "image/*";
+    file.onchange = async () => {
+      if (!file.files[0]) return;
+      try { qr = await fileToDataUrl(file.files[0]); prev.src = qr; prev.hidden = false; } catch (e) { toast(e.message, true); }
+    };
+    const rm = el("button", "sec", "Remove QR"); rm.onclick = () => { qr = ""; prev.hidden = true; file.value = ""; };
+    const sv = el("button", null, "Save GCash Details");
+    sv.onclick = async () => {
+      const name = nm.value.trim(), number = no.value.replace(/[\s-]/g, "");
+      if (!name) return toast("Enter the GCash account name.", true);
+      if (!/^\+?\d{10,13}$/.test(number)) return toast("Enter a valid GCash number.", true);
+      sv.disabled = true;
+      try { await db.ref("settings/gcash").set({ name, number, qr }); toast("GCash details saved."); }
+      catch (e) { toast("Save failed: " + errMsg(e), true); }
+      sv.disabled = false;
+    };
+    gc.append(nm, no, el("div", "muted", "GCash QR code (upload a screenshot of your QR)"), file, prev, rm, sv);
+    v.append(gc);
+  }
+}
+async function buildRate() {
+  const v = $("v-rate"), c = el("div", "card"); let stars = 0;
+  c.append(el("h3", null, "Rate this app"));
+  const row = el("div", "stars"), btns = [];
+  for (let i = 1; i <= 5; i++) {
+    const b = el("button", null, "★"); b.type = "button";
+    b.onclick = () => { stars = i; btns.forEach((x, j) => x.classList.toggle("on", j < i)); };
+    btns.push(b); row.append(b);
+  }
+  const ta = el("textarea"); ta.rows = 3; ta.placeholder = "Comments (optional)";
+  const sub = el("button", null, "Submit Rating");
+  sub.onclick = async () => {
+    if (!stars) return toast("Tap a star first.", true);
+    try { await db.ref("ratings/" + S.user.uid).set({ stars, comment: ta.value.trim(), email: S.user.email, ts: TS() }); toast("Thank you for your rating!"); }
+    catch (e) { toast("Failed: " + e.message, true); }
+  };
+  c.append(row, ta, sub); v.replaceChildren(c);
+  try {
+    const s = await db.ref("ratings/" + S.user.uid).once("value"), r = s.val();
+    if (r) { stars = r.stars; btns.forEach((x, j) => x.classList.toggle("on", j < stars)); ta.value = r.comment || ""; }
+  } catch (e) {}
+}
+
+/* ---------- Receipts / History ---------- */
+function showReceipt(r) {
+  const w = el("div"); w.append(el("h3", null, "🧾 Receipt"));
+  const rc = el("div", "rc");
+  [["Receipt No.", (r.id || "").slice(-8).toUpperCase()], ["Date", fdate(r.ts)], ["Room", rname(r.room)],
+   ["Loaded", r.kwh + " kWh"], ["Rate", peso(r.rate) + " per kWh"], ["Total Paid", peso(r.amount)],
+   ["Payment", r.method === "online" ? "Online payment" : "Manual payment"]]
+    .concat(r.method === "online" ? [["Reference No.", r.ref]] : [])
+    .forEach(([l, x]) => { const d = el("div"); d.append(el("span", null, l), el("span", null, x)); rc.append(d); });
+  const ok = el("button", null, "Close"); ok.onclick = closeModal;
+  w.append(rc, ok); openModal(w);
+}
+function renderHistory() {
+  const v = $("v-history"), c = el("div", "card");
+  c.append(el("h3", null, "Load History"));
+  const list = S.receipts.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  if (!list.length) c.append(el("p", "muted", "No receipts yet."));
+  list.forEach(r => {
+    const it = el("div", "item");
+    it.append(el("b", null, rname(r.room) + " · " + r.kwh + " kWh · " + peso(r.amount)), el("div", "muted", fdate(r.ts) + " · " + (r.method === "online" ? "Online" : "Manual")));
+    it.onclick = () => showReceipt(r); c.append(it);
+  });
+  v.replaceChildren(c);
+}
+function flattenReceipts(val, perRoom) {
+  const out = [];
+  const add = (room, m) => Object.entries(m || {}).forEach(([id, r]) => out.push({ id, room, ...r }));
+  if (perRoom) add(perRoom, val); else Object.entries(val || {}).forEach(([room, m]) => add(room, m));
+  return out;
+}
+
+/* ---------- Load flow (landlord loads / tenant requests) ---------- */
+async function applyLoad({ room, kwh, rate, method, ref, requestId, amount }) {
+  if (requestId) {
+    const claim = await db.ref(`requests/${room}/${requestId}/status`).transaction(s => s === "pending" ? "processing" : undefined);
+    if (!claim.committed) throw new Error("This request was already handled.");
+  }
+  const res = await db.ref(`rooms/${room}/ctrl/loaded`).transaction(c => {
+    const o = Number(c || 0); if (!Number.isFinite(o) || o < 0) return;
+    return Math.round((o + kwh) * 1000) / 1000;
+  });
+  if (!res.committed) throw new Error("Top-up not committed. Check Firebase Rules.");
+  const rr = db.ref(`receipts/${room}`).push();
+  await rr.set({ room, kwh, rate, amount: amount ?? +(kwh * rate).toFixed(2), method, ref: ref || "", ts: TS(), by: S.user.email });
+  if (requestId) await db.ref(`requests/${room}/${requestId}`).update({ status: "confirmed", receiptId: rr.key, confirmedTs: TS() });
+  const snap = await rr.once("value");
+  return { id: rr.key, ...snap.val() };
+}
+
+function loadFlow(mode) {
+  if (!(S.rate > 0)) return toast(mode === "landlord" ? "Set the rate per kWh in Settings first." : "The landlord has not set the rate yet.", true);
+  const w = el("div"), st = { room: S.room, entry: "kwh", kwh: null, amount: null, method: "manual" };
+
+  function step2() {
+    w.replaceChildren();
+    w.append(el("h3", null, (mode === "landlord" ? "Load " : "Request load for ") + rname(st.room)),
+      el("div", "muted", "Rate: " + peso(S.rate) + " per kWh"));
+
+    // Choose how to enter the top-up
+    const seg = el("div", "seg"), sK = el("button", "on-b", "By kWh"), sP = el("button", "", "By pesos");
+    sK.type = sP.type = "button"; seg.append(sK, sP);
+
+    const chips = el("div", "chips");
+    const row = el("div", "grid2");
+    const inp = el("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0"; inp.step = "any";
+    const unit = el("select");
+    [["kWh", "kWh"], ["Wh", "Wh"]].forEach(([v, l]) => { const o = el("option", null, l); o.value = v; unit.append(o); });
+    row.append(inp, unit);
+    const hint = el("div", "muted");
+
+    const comp = el("div", "comp muted", "Select or enter an amount to see the computation.");
+    const pm = el("div"); pm.append(el("div", "muted", "Payment method"));
+    const cbs = {}, refRow = el("div"), refIn = el("input");
+    const payBox = mode === "tenant" ? gcashBox() : el("div"); payBox.hidden = true;
+    refIn.placeholder = "Reference number"; refRow.hidden = true; refRow.append(refIn);
+    const sub = el("button", null, mode === "landlord" ? "Confirm & Load" : "Send Request"); sub.disabled = true;
+    const cn = el("button", "sec", "Cancel"); cn.onclick = closeModal;
+
+    function validate() { sub.disabled = !st.kwh || (st.method === "online" && !refIn.value.trim()); }
+    refIn.oninput = validate;
+
+    function showError(msg) { comp.className = "comp"; comp.replaceChildren(el("div", "error", msg)); }
+
+    function recalc() {
+      st.kwh = null; st.amount = null;
+      const raw = parseFloat(inp.value);
+      if (!(raw > 0)) {
+        comp.className = "comp muted"; comp.replaceChildren(document.createTextNode("Select or enter an amount to see the computation."));
+        validate(); return;
+      }
+      if (st.entry === "kwh") {
+        const k = Math.round((unit.value === "Wh" ? raw / 1000 : raw) * 1000) / 1000;
+        if (k < 0.001) showError("The smallest top-up is 0.001 kWh (1 Wh).");
+        else if (k > MAX_TOPUP_KWH) showError("The largest top-up is " + MAX_TOPUP_KWH + " kWh.");
+        else {
+          st.kwh = k; st.amount = +(k * S.rate).toFixed(2);
+          comp.className = "comp";
+          comp.replaceChildren(el("div", "muted", "Computation"),
+            el("div", null, k.toFixed(3) + " kWh × " + peso(S.rate) + " per kWh"),
+            el("div", "total", "Total to pay: " + peso(st.amount)));
+        }
+      } else {
+        const p = Math.round(raw * 100) / 100, k = Math.round(p / S.rate * 1000) / 1000;
+        if (p < 1) showError("The smallest top-up is ₱1.00.");
+        else if (p > MAX_TOPUP_PESO) showError("The largest top-up is " + peso(MAX_TOPUP_PESO) + ".");
+        else if (k < 0.001) showError("That amount is too small to load.");
+        else {
+          st.kwh = k; st.amount = p;
+          comp.className = "comp";
+          comp.replaceChildren(el("div", "muted", "Computation"),
+            el("div", null, peso(p) + " ÷ " + peso(S.rate) + " per kWh"),
+            el("div", "total", "You get: " + k.toFixed(3) + " kWh"),
+            el("div", "muted", "Total to pay: " + peso(p)));
+        }
+      }
+      validate();
+    }
+
+    function setEntry(m) {
+      st.entry = m;
+      sK.className = m === "kwh" ? "on-b" : ""; sP.className = m === "peso" ? "on-b" : "";
+      unit.hidden = m !== "kwh";
+      row.style.gridTemplateColumns = m === "kwh" ? "1fr 1fr" : "1fr";
+      unit.value = "kWh"; inp.value = "";
+      inp.placeholder = m === "kwh" ? "Custom amount (e.g. 0.001)" : "Amount in pesos (e.g. 50)";
+      hint.textContent = m === "kwh" ? "Choose kWh or Wh. 1 Wh = 0.001 kWh, which is the smallest top-up."
+                                     : "Enter how many pesos you want to load. The kWh you get is computed from the rate.";
+      chips.replaceChildren();
+      (m === "kwh" ? [1, 5, 10, 15, 20] : [20, 50, 100, 200, 500]).forEach(k => {
+        const b = el("button", "chip", m === "kwh" ? k + " kWh" : "₱" + k); b.type = "button";
+        b.onclick = () => { inp.value = k; unit.value = "kWh"; [...chips.children].forEach(c => c.classList.toggle("on", c === b)); recalc(); };
+        chips.append(b);
+      });
+      recalc();
+    }
+    sK.onclick = () => setEntry("kwh");
+    sP.onclick = () => setEntry("peso");
+    inp.oninput = () => { [...chips.children].forEach(c => c.classList.remove("on")); recalc(); };
+    unit.onchange = () => { [...chips.children].forEach(c => c.classList.remove("on")); recalc(); };
+
+    [["manual", "Manual payment (cash)"], ["online", "Online payment"]].forEach(([k, l]) => {
+      const lab = el("label", "chk"), cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = k === st.method;
+      cb.onchange = () => { st.method = k; Object.entries(cbs).forEach(([kk, c]) => c.checked = kk === k); refRow.hidden = k !== "online"; payBox.hidden = k !== "online" || mode !== "tenant"; validate(); };
+      cbs[k] = cb; lab.append(cb, document.createTextNode(l)); pm.append(lab);
+    });
+
+    sub.onclick = async () => {
+      if (!st.kwh) return;
+      const ref = st.method === "online" ? refIn.value.trim() : "";
+      if (mode === "landlord" && !confirm(`Add ${st.kwh.toFixed(3)} kWh to ${rname(st.room)}? Total: ${peso(st.amount)}`)) return;
+      sub.disabled = true;
+      try {
+        if (mode === "landlord") {
+          const r = await applyLoad({ room: st.room, kwh: st.kwh, rate: S.rate, amount: st.amount, method: st.method, ref });
+          toast("Load saved for " + rname(st.room) + "."); showReceipt(r);
+        } else {
+          await db.ref("requests/" + S.room).push({ room: S.room, kwh: st.kwh, rate: S.rate, amount: st.amount, method: st.method, ref, status: "pending", ts: TS(), by: S.user.email });
+          closeModal(); toast("Request sent to the landlord.");
+        }
+      } catch (e) { toast("Failed: " + e.message, true); sub.disabled = false; }
+    };
+
+    w.append(row, hint, seg, chips, comp, pm, payBox, refRow, sub, cn);
+    setEntry("kwh");
+  }
+
+  if (mode === "landlord") {
+    const sel = el("select");
+    ROOMS.forEach(r => { const o = el("option", null, rname(r)); o.value = r; sel.append(o); });
+    const ok = el("button", null, "OK"); ok.onclick = () => { st.room = sel.value; step2(); };
+    const cn = el("button", "sec", "Cancel"); cn.onclick = closeModal;
+    w.append(el("h3", null, "Select room"), sel, ok, cn);
+  } else step2();
+  openModal(w);
+}
+
+/* ---------- Shared pieces ---------- */
+function stat(l, v) { const s = el("div", "stat"); s.append(el("div", "l", l), el("div", "v", v)); return s; }
+function isActive(v) { return v === true || v === 1 || v === "1" || v === "true"; }
+function pills(ctrl, live) {
+  const d = el("div"), cut = ctrl.cutoff;
+  const ts = num(live && live.ts), raw = firstValue(live, KEYS.st);
+  const act = ts !== null ? Date.now() - ts < 30000 : (raw === null ? null : isActive(raw));
+  d.append(
+    el("span", "pill " + (cut === true ? "r" : cut === false ? "g" : ""), cut === true ? "POWER OFF (Cutoff)" : cut === false ? "POWER ON" : "POWER UNKNOWN"),
+    el("span", "pill " + (act === null ? "" : act ? "g" : "r"), act === null ? "DEVICE UNKNOWN" : act ? "DEVICE ACTIVE" : "DEVICE INACTIVE"));
+  return d;
+}
+function readings(live) {
+  const g = el("div", "grid2");
+  g.append(stat("Voltage", display(firstValue(live, KEYS.v)) + " V"), stat("Current", display(firstValue(live, KEYS.i), 3) + " A"),
+    stat("Power", display(firstValue(live, KEYS.p)) + " W"), stat("Power Factor", display(firstValue(live, KEYS.pf))),
+    stat("Total Energy", display(firstValue(live, KEYS.e), 3) + " kWh"));
+  return g;
+}
+
+/* ---------- Phone notifications (sound / vibrate switches) ---------- */
+function npGet(k, def) { try { const v = localStorage.getItem("np_" + k); return v === null ? def : v === "1"; } catch (e) { return def; } }
+function npSet(k, v) { try { localStorage.setItem("np_" + k, v ? "1" : "0"); } catch (e) {} }
+const notifSupported = () => "Notification" in window && "serviceWorker" in navigator;
+
+async function notify(title, body, tag) {
+  if (!npGet("on", true)) return;
+  const sound = npGet("sound", true), vib = npGet("vibrate", true);
+  // Vibrate-only: browsers silence vibration on silent notifications, so vibrate directly while the app is open.
+  if (vib && !sound && navigator.vibrate && document.visibilityState === "visible") navigator.vibrate([200, 100, 200]);
+  if (!notifSupported() || Notification.permission !== "granted") return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const opts = { body, tag: tag || "eload", renotify: true, icon: "icon-192.png", badge: "icon-192.png", data: { url: "./" } };
+    if (sound) { opts.silent = false; opts.vibrate = vib ? [200, 100, 200, 100, 300] : []; }
+    else opts.silent = true;              // silent notifications cannot carry a vibrate pattern
+    await reg.showNotification(title, opts);
+  } catch (e) {}
+}
+
+async function askNotifPermission() {
+  if (!notifSupported()) { toast("This browser does not support phone notifications.", true); return "unsupported"; }
+  let p = Notification.permission;
+  if (p === "default") { try { p = await Notification.requestPermission(); } catch (e) {} }
+  if (p === "granted") toast("Phone notifications are on.");
+  else if (p === "denied") toast("Notifications are blocked. Allow them in your phone settings.", true);
+  return p;
+}
+
+function checkNotifPrompt() {
+  const box = $("notifPrompt"); if (!box) return;
+  box.replaceChildren();
+  let dismissed = false; try { dismissed = sessionStorage.getItem("np_dismiss") === "1"; } catch (e) {}
+  if (!notifSupported() || Notification.permission !== "default" || dismissed) return;
+  const c = el("div", "card");
+  c.append(el("b", null, "🔔 Turn on phone notifications"),
+    el("div", "muted", "Get an alert on your phone for load requests, confirmations, and zero balance."));
+  const row = el("div", "grid2"), yes = el("button", null, "Turn on"), no = el("button", "sec", "Not now");
+  yes.onclick = async () => { await askNotifPermission(); checkNotifPrompt(); };
+  no.onclick = () => { try { sessionStorage.setItem("np_dismiss", "1"); } catch (e) {} checkNotifPrompt(); };
+  row.append(yes, no); c.append(row); box.append(c);
+}
+
+function buildNotifCard() {
+  const c = el("div", "card"); c.append(el("h3", null, "Phone Notifications"));
+  const st = el("div", "muted");
+  const paint = () => {
+    st.textContent = !notifSupported() ? "This browser does not support phone notifications."
+      : Notification.permission === "granted" ? "Allowed on this phone."
+      : Notification.permission === "denied" ? "Blocked. Allow notifications for this app in your phone settings."
+      : "Not turned on yet.";
+  };
+  paint(); c.append(st);
+  const tog = (label, key) => {
+    const lab = el("label", "chk"), cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = npGet(key, true); cb.onchange = () => npSet(key, cb.checked);
+    lab.append(cb, document.createTextNode(label)); return lab;
+  };
+  c.append(tog("Notifications on", "on"), tog("Sound", "sound"), tog("Vibrate", "vibrate"));
+  const en = el("button", null, "Allow notifications");
+  en.hidden = !notifSupported() || Notification.permission === "granted";
+  en.onclick = async () => { await askNotifPermission(); paint(); en.hidden = Notification.permission === "granted"; checkNotifPrompt(); };
+  const test = el("button", "sec", "Send test notification");
+  test.onclick = async () => {
+    if (!npGet("on", true)) return toast("Turn on \"Notifications on\" first.", true);
+    const p = await askNotifPermission(); paint();
+    if (p === "granted") notify("Boarding House Electricity", "Test notification. Your alerts will look like this.", "test");
+  };
+  c.append(en, test, el("p", "muted", "Alerts arrive while the app is open or still running in the background. Sound off makes notifications silent. Vibrate-only works while the app is open."));
+  return c;
+}
+
+/* ---------- Notifications (Alerts tab) ---------- */
+function updateBadge() {
+  const n = S.pending.length + (S.role === "landlord" ? S.zeroRooms.length : (S.zero ? 1 : 0));
+  const b = $("notifBadge"); if (!b) return;
+  b.textContent = n > 99 ? "99+" : String(n); b.hidden = n === 0;
+}
+function refreshNotifs() { updateBadge(); if (!$("v-notifs").hidden) renderNotifs(); }
+
+function landlordReqItem(r) {
+  const it = el("div", "item"); it.style.cursor = "default";
+  it.append(el("b", null, rname(r.room) + " · " + r.kwh + " kWh · " + peso(r.amount)),
+    el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual payment") + " · " + fdate(r.ts)));
+  const ok = el("button", null, "Confirm"), no = el("button", "sec", "Reject");
+  ok.onclick = async () => {
+    if (!confirm(r.method === "online" ? `Reference no. ${r.ref}\nDoes it match your payment record?` : "Confirm you received the manual payment?")) return;
+    ok.disabled = true;
+    try { const rc = await applyLoad({ room: r.room, kwh: r.kwh, rate: r.rate, amount: r.amount, method: r.method, ref: r.ref, requestId: r.id }); toast("Request confirmed."); showReceipt(rc); }
+    catch (e) { toast("Failed: " + e.message, true); ok.disabled = false; }
+  };
+  no.onclick = async () => {
+    if (!confirm("Reject this request?")) return;
+    try { await db.ref(`requests/${r.room}/${r.id}`).update({ status: "rejected" }); } catch (e) { toast("Failed: " + e.message, true); }
+  };
+  it.append(ok, no);
+  return it;
+}
+
+function renderNotifs() {
+  const v = $("v-notifs"), root = el("div");
+  root.append(el("h3", null, "🔔 Notifications"));
+
+  if (S.role === "landlord") {
+    const c = el("div", "card"); c.append(el("h3", null, "Load Requests (" + S.pending.length + ")"));
+    if (!S.pending.length) c.append(el("p", "muted", "No pending requests."));
+    S.pending.forEach(r => c.append(landlordReqItem(r)));
+    root.append(c);
+    if (S.zeroRooms.length) {
+      const z = el("div", "card"); z.append(el("h3", null, "⚠️ Zero Balance (" + S.zeroRooms.length + ")"));
+      S.zeroRooms.forEach(r => {
+        const it = el("div", "item"); it.style.cursor = "default";
+        it.append(el("b", null, rname(r)), el("div", "muted", "No balance left. Power stays cut until the room tops up."));
+        z.append(it);
+      });
+      root.append(z);
+    }
+  } else {
+    if (S.zero) {
+      const a = el("div", "alert");
+      a.append(el("b", null, "⚠️ Zero balance"),
+        el("div", null, "Your room's power is cut. Top up first before you can use electricity again."));
+      const b = el("button", null, "➕ Request Load"); b.onclick = () => loadFlow("tenant");
+      a.append(b); root.append(a);
+    }
+    if (S.pending.length) {
+      const c = el("div", "card"); c.append(el("h3", null, "Pending Requests (" + S.pending.length + ")"));
+      S.pending.forEach(r => {
+        const it = el("div", "item"); it.style.cursor = "default";
+        it.append(el("b", null, r.kwh + " kWh · " + peso(r.amount)),
+          el("div", "muted", (r.method === "online" ? "Online · Ref: " + r.ref : "Manual") + " · " + (r.status === "processing" ? "Being confirmed…" : "Waiting for landlord")),
+          el("div", "muted", fdate(r.ts)));
+        c.append(it);
+      });
+      root.append(c);
+    }
+    if (S.results.length) {
+      const c = el("div", "card"); c.append(el("h3", null, "Recent Updates"));
+      S.results.forEach(r => {
+        const ok = r.status === "confirmed";
+        const it = el("div", "item"); it.style.cursor = "default";
+        it.append(el("b", null, (ok ? "✅ Confirmed · " : "❌ Rejected · ") + r.kwh + " kWh · " + peso(r.amount)),
+          el("div", "muted", fdate(ok ? (r.confirmedTs || r.ts) : r.ts)));
+        c.append(it);
+      });
+      root.append(c);
+    }
+    if (!S.zero && !S.pending.length && !S.results.length) {
+      const c = el("div", "card"); c.append(el("p", "muted", "No notifications yet."));
+      root.append(c);
+    }
+  }
+  v.replaceChildren(root);
+}
+
+/* ---------- Landlord ---------- */
+function initLandlord() {
+  const v = $("v-home"), c = el("div", "card");
+  c.append(el("h3", null, "Landlord Dashboard"), el("div", "muted", "Monitoring: Rooms 1, 2, and 3"));
+  const b = el("button", null, "⚡ Load Electricity"); b.onclick = () => loadFlow("landlord"); c.append(b);
+  const reqBox = el("div"); reqBox.id = "reqBox";
+  const rooms = el("div"); rooms.id = "roomsBox";
+  v.replaceChildren(c, reqBox, el("h3", null, "All Rooms"), rooms);
+
+  ROOMS.forEach(r => {
+    S.rooms[r] = { ctrl: {}, live: {} };
+    watch(`rooms/${r}/ctrl`, x => { S.rooms[r].ctrl = x || {}; renderRooms(); });
+    watch(`rooms/${r}/live`, x => { S.rooms[r].live = x || {}; renderRooms(); });
+  });
+  watch("requests", renderRequests);
+  watch("receipts", x => { S.receipts = flattenReceipts(x); if (!$("v-history").hidden) renderHistory(); });
+}
+function renderRooms() {
+  S.zeroRooms = ROOMS.filter(r => { const b = num(firstValue((S.rooms[r] || {}).live, KEYS.bal)); return b !== null && b <= ZERO_KWH; });
+  ROOMS.forEach(r => {
+    const b = num(firstValue((S.rooms[r] || {}).live, KEYS.bal)); if (b === null) return;
+    const z = b <= ZERO_KWH;
+    if (z && S.zeroPrev[r] === false) notify("⚠️ Zero balance", rname(r) + " has no balance left. Power is cut.", "zero-" + r);
+    S.zeroPrev[r] = z;
+  });
+  refreshNotifs();
+  const box = $("roomsBox"); if (!box) return; box.replaceChildren();
+  ROOMS.forEach(r => {
+    const { ctrl, live } = S.rooms[r], loaded = num(ctrl.loaded) || 0, bal = num(firstValue(live, KEYS.bal));
+    const pct = loaded > 0 && bal !== null ? Math.max(0, Math.min(100, bal / loaded * 100)) : 0;
+    const c = el("div", "card"); c.append(el("h3", null, rname(r)), pills(ctrl, live));
+    c.append(el("div", "muted", "Balance " + display(bal, 3) + " / Loaded " + display(loaded, 3) + " kWh"));
+    if (bal !== null && bal <= ZERO_KWH) c.append(el("div", "error", "⚠️ Zero balance. Waiting for a top-up."));
+    const bar = el("div", "bar"), fill = el("i"); fill.style.width = pct + "%"; if (pct <= 20) fill.style.background = "#dc2626";
+    bar.append(fill); c.append(bar, readings(live)); box.append(c);
+  });
+}
+function renderRequests(all) {
+  const list = [];
+  Object.entries(all || {}).forEach(([room, m]) => Object.entries(m || {}).forEach(([id, r]) => { if (r.status === "pending") list.push({ id, ...r, room }); }));
+  list.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  const ids = list.map(r => r.id);
+  if (seenReq === null) { if (ids.length) toast("🔔 " + ids.length + " pending load request(s)."); }
+  else list.filter(r => !seenReq.includes(r.id)).forEach(r => {
+    toast(`🔔 ${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`);
+    notify("New load request", `${rname(r.room)} requests ${r.kwh} kWh (${peso(r.amount)}).`, "req-" + r.id);
+  });
+  seenReq = ids;
+  S.pending = list;
+
+  // Small banner on the dashboard that opens the Alerts tab
+  const box = $("reqBox");
+  if (box) {
+    box.replaceChildren();
+    if (list.length) {
+      const a = el("div", "alert");
+      a.append(el("b", null, "🔔 " + list.length + " pending load request" + (list.length > 1 ? "s" : "")));
+      const go = el("button", null, "View requests"); go.onclick = () => showView("notifs");
+      a.append(go); box.append(a);
+    }
+  }
+  refreshNotifs();
+}
+
+/* ---------- Tenant ---------- */
+function updateGauge(balV, loadV) {
+  const bal = num(balV), loaded = num(loadV), arc = $("gArc");
+  if (bal === null || bal < 0 || loaded === null || loaded <= 0) {
+    $("gRatio").textContent = "— / —"; $("gMax").textContent = "— kWh"; arc.setAttribute("stroke-dasharray", "0 100"); return;
+  }
+  const safe = Math.min(bal, loaded), pct = safe / loaded * 100;
+  $("gRatio").textContent = safe.toFixed(3) + " / " + loaded.toFixed(3);
+  $("gMax").textContent = loaded.toFixed(3) + " kWh";
+  arc.setAttribute("stroke-dasharray", pct + " 100");
+  arc.setAttribute("stroke", pct <= 20 ? "#dc2626" : "#159a72");
+}
+function getSeen() { try { return JSON.parse(localStorage.getItem("seen_" + S.user.uid) || "[]"); } catch (e) { return []; } }
+function setSeen(a) { try { localStorage.setItem("seen_" + S.user.uid, JSON.stringify(a.slice(-100))); } catch (e) {} }
+
+function initTenant(room) {
+  const T = { loaded: null, bal: null, consumed: null, cutoff: null, busy: false, wasZero: null };
+  $("v-home").innerHTML = `
+  <div id="tAlert"></div>
+  <div class="card">
+    <h3>${rname(room)} — My Electricity</h3>
+    <div id="tPills"></div>
+    <div class="muted" style="text-align:center">AVAILABLE / TOTAL LOADED</div>
+    <svg viewBox="0 0 320 185" role="img" aria-label="Available balance compared with total loaded" style="width:100%;max-width:360px;display:block;margin:auto">
+      <path d="M 40 150 A 120 120 0 0 1 280 150" fill="none" style="stroke:var(--track)" stroke-width="20" stroke-linecap="round"/>
+      <path id="gArc" d="M 40 150 A 120 120 0 0 1 280 150" fill="none" stroke="#159a72" stroke-width="20" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="transition:stroke-dasharray .4s"/>
+      <text id="gRatio" x="160" y="104" text-anchor="middle" font-size="21" font-weight="bold" fill="currentColor">— / —</text>
+      <text x="160" y="128" text-anchor="middle" font-size="13" fill="currentColor">kWh</text>
+      <text x="40" y="177" text-anchor="middle" font-size="12" fill="currentColor">0</text>
+      <text id="gMax" x="280" y="177" text-anchor="middle" font-size="12" fill="currentColor">— kWh</text>
+    </svg>
+    <div class="grid2"><div id="tBal"></div><div id="tLoaded"></div></div>
+    <button id="reqLoadBtn">➕ Request Load</button>
+  </div>
+  <div class="card">
+    <h3>Power Control</h3>
+    <div id="tCutState" class="value">—</div>
+    <div class="seg" style="margin-top:8px">
+      <button id="btnOn" disabled>ON<br><small>Activate Power</small></button>
+      <button id="btnOff" disabled>OFF<br><small>Activate Cutoff</small></button>
+    </div>
+    <p class="muted">ON = power is allowed (if balance and safety checks pass). OFF = cutoff is activated and the room power is turned off.</p>
+  </div>
+  <div class="card"><h3>Electricity Readings</h3><div id="tReadings"></div></div>`;
+
+  $("reqLoadBtn").onclick = () => loadFlow("tenant");
+  const setCut = async next => {
+    if (T.busy || T.cutoff === null || T.cutoff === next) return;
+    if (!confirm(next ? "Activate cutoff? The room power will turn OFF." : "Activate power? The room power will turn ON if balance and safety checks pass.")) return;
+    T.busy = true;
+    try { await db.ref(`rooms/${room}/ctrl/cutoff`).set(next);
+      showMessage("statusMessage", next ? "Cutoff activated. Waiting for the ESP32." : "Power activated. It still depends on balance and safety checks."); }
+    catch (e) { showMessage("statusMessage", "Cutoff update failed: " + e.message, true); }
+    T.busy = false;
+  };
+  $("btnOn").onclick = () => setCut(false);
+  $("btnOff").onclick = () => setCut(true);
+
+  const paintBal = () => {
+    updateGauge(T.bal, T.loaded);
+    const b = num(T.bal), l = num(T.loaded);
+    $("tBal").replaceChildren(stat("Available Balance", b === null ? "— kWh" : Math.min(b, l ?? b).toFixed(3) + " kWh"));
+    $("tLoaded").replaceChildren(stat("Total Loaded", display(l, 3) + " kWh"));
+  };
+
+  // Zero-balance alert. Uses loaded minus consumed so it clears right after a top-up.
+  const paintAlert = () => {
+    const l = num(T.loaded), c = num(T.consumed);
+    const eff = (l !== null && c !== null) ? l - c : (num(T.bal) ?? (l !== null && l <= 0 ? 0 : null));
+    const zero = eff !== null && eff <= ZERO_KWH;
+    const box = $("tAlert"); if (!box) return;
+    box.replaceChildren();
+    if (zero) {
+      const a = el("div", "alert");
+      a.append(el("b", null, "⚠️ Zero balance"),
+        el("div", null, "Your room's power is cut. Top up first before you can use electricity again."));
+      const b = el("button", null, "➕ Request Load"); b.onclick = () => loadFlow("tenant");
+      a.append(b); box.append(a);
+    }
+    if (zero && T.wasZero === false) {
+      toast("⚠️ Zero balance. Please top up to use electricity.", true);
+      notify("⚠️ Zero balance", "Your power is cut. Top up to use electricity again.", "zero");
+    }
+    if (eff !== null) T.wasZero = zero;   // first real value is only a baseline
+    S.zero = zero; refreshNotifs();
+  };
+
+  watch(`rooms/${room}/ctrl`, c => {
+    c = c || {}; T.loaded = c.loaded; paintBal(); paintAlert();
+    T.cutoff = typeof c.cutoff === "boolean" ? c.cutoff : null;
+    const on = $("btnOn"), off = $("btnOff");
+    on.disabled = off.disabled = T.cutoff === null;
+    on.className = T.cutoff === false ? "on-g" : ""; off.className = T.cutoff === true ? "on-r" : "";
+    $("tCutState").textContent = T.cutoff === null ? "Unknown" : T.cutoff ? "POWER OFF — Cutoff activated" : "POWER ON — Power allowed";
+    S.rooms[room] = S.rooms[room] || { ctrl: {}, live: {} }; S.rooms[room].ctrl = c; paintPills();
+  });
+  const paintPills = () => { const r = S.rooms[room]; $("tPills").replaceChildren(pills(r.ctrl, r.live)); };
+  S.rooms[room] = { ctrl: {}, live: {} };
+  watch(`rooms/${room}/live`, l => {
+    l = l || {}; T.bal = firstValue(l, KEYS.bal); T.consumed = l.totalConsumed; paintBal(); paintAlert();
+    $("tReadings").replaceChildren(readings(l)); S.rooms[room].live = l; paintPills();
+  });
+  watch("requests/" + room, v => {
+    const arr = Object.entries(v || {}).map(([id, r]) => ({ id, ...r })).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    const seen = getSeen();
+    arr.forEach(r => {
+      if ((r.status === "confirmed" || r.status === "rejected") && !seen.includes(r.id)) {
+        toast(r.status === "confirmed" ? `✅ Your request for ${r.kwh} kWh was confirmed. Balance added.` : `❌ Your request for ${r.kwh} kWh was rejected.`, r.status === "rejected");
+        notify(r.status === "confirmed" ? "✅ Load confirmed" : "❌ Load rejected",
+          r.status === "confirmed" ? `${r.kwh} kWh was added to your balance.` : `Your request for ${r.kwh} kWh was rejected.`, "res-" + r.id);
+        seen.push(r.id);
+      }
+    });
+    setSeen(seen);
+    S.pending = arr.filter(r => r.status === "pending" || r.status === "processing");
+    S.results = arr.filter(r => r.status === "confirmed" || r.status === "rejected").slice(0, 10);
+    refreshNotifs();
+  });
+  watch("receipts/" + room, x => { S.receipts = flattenReceipts(x, room); if (!$("v-history").hidden) renderHistory(); });
+}
+
+/* ---------- Auth ---------- */
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault(); showMessage("loginMessage", "Signing in...");
+  try { await auth.signInWithEmailAndPassword($("email").value.trim(), $("password").value); }
+  catch (err) { showMessage("loginMessage", err.message, true); }
+});
+function startDashboard(user) {
+  stopListeners();
+  const email = (user.email || "").toLowerCase();
+  S.user = user; S.receipts = []; S.rooms = {}; S.rate = null; S.gcash = {};
+  S.pending = []; S.results = []; S.zero = false; S.zeroRooms = []; S.zeroPrev = {};
+  S.role = email === LANDLORD_EMAIL.toLowerCase() ? "landlord" : (TENANT_ROOMS[email] ? "tenant" : null);
+  S.room = TENANT_ROOMS[email] || null;
+  if (!S.role) {
+    auth.signOut();
+    showMessage("loginMessage", "This email is not assigned in the dashboard code. Check the configured email mapping.", true);
+    return;
+  }
+  $("loginPanel").hidden = true; $("app").hidden = false; $("tabs").hidden = false; $("topMenu").hidden = false;
+  showMessage("statusMessage", "Connected.");
+  watch("settings", x => { x = x || {}; S.rate = num(x.rate); S.gcash = x.gcash || {}; if (!$("v-settings").hidden) buildSettings(); });
+  S.role === "landlord" ? initLandlord() : initTenant(S.room);
+  showView("home");
+  updateBadge();
+  checkNotifPrompt();
+}
+async function logout() {
+  stopListeners(); $("menuSheet").hidden = true;
+  await auth.signOut(); $("password").value = "";
+  showMessage("loginMessage", "Logged out.");
+}
+setInterval(() => {
+  if (S.role === "landlord") renderRooms();
+  else if (S.room && S.rooms[S.room] && $("tPills")) {
+    const r = S.rooms[S.room];
+    $("tPills").replaceChildren(pills(r.ctrl, r.live));
+  }
+}, 15000);
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth(); db = firebase.database();
+  auth.onAuthStateChanged(user => {
+    if (user) startDashboard(user);
+    else { stopListeners(); $("app").hidden = true; $("tabs").hidden = true; $("topMenu").hidden = true; $("loginPanel").hidden = false; }
+  });
+} catch (err) { showMessage("loginMessage", "Firebase setup error: " + err.message, true); }
+
+/* ---------- Install as an app (PWA) ---------- */
+var deferredInstall = null;
+async function installApp() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  try { await deferredInstall.userChoice; } catch (e) {}
+  deferredInstall = null; $("installBtn").hidden = true; $("menuSheet").hidden = true;
+}
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; $("installBtn").hidden = false; });
+window.addEventListener("appinstalled", () => { deferredInstall = null; $("installBtn").hidden = true; toast("App installed."); });
+$("installBtn").addEventListener("click", installApp);
+if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) $("iosHint").hidden = false;
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+
+/* ---------- Landing screen logic ---------- */
+(function () {
+  const land = $("landing"); if (!land) return;
+  const help = $("landHelp");
+  function closeLanding() {
+    try { sessionStorage.setItem("landingDone", "1"); } catch (e) {}
+    land.classList.add("out"); document.body.classList.remove("has-landing");
+    setTimeout(() => { land.hidden = true; }, 360);
+  }
+  function say(text, withCopy) {
+    help.hidden = false; help.replaceChildren(document.createTextNode(text));
+    if (withCopy) {
+      const b = el("button", null, "Copy link"); b.type = "button";
+      b.onclick = async () => {
+        try { await navigator.clipboard.writeText(location.origin + location.pathname); b.textContent = "Link copied"; }
+        catch (e) { b.textContent = "Copy failed"; }
+      };
+      help.append(b);
+    }
+  }
+  $("landWeb").onclick = closeLanding;
+  $("landApp").onclick = async () => {
+    const ua = navigator.userAgent;
+    if (deferredInstall) {
+      const dp = deferredInstall; deferredInstall = null;
+      try {
+        dp.prompt();
+        const c = await dp.userChoice;
+        say(c.outcome === "accepted" ? "Installing. When it finishes, open BH Electricity from your home screen."
+                                     : "Not installed. You can still open it using the web.");
+      } catch (e) { say("Could not start the install. Use your browser menu and choose Install app."); }
+      const ib = $("installBtn"); if (ib) ib.hidden = true;
+      return;
+    }
+    if (/iphone|ipad|ipod/i.test(ua)) { say("On iPhone, open this page in Safari, tap the Share button, then choose Add to Home Screen.", false); return; }
+    if (/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|; wv\)/i.test(ua)) { say("This link opened inside another app (like Messenger). Copy the link, open it in Chrome, then tap Install the app again.", true); return; }
+    say("Tap the ⋮ menu in Chrome, then choose Install app or Add to Home screen. If the app is already installed, open it from your home screen.", true);
+  };
+})();
+</script>
+</body>
+</html>
