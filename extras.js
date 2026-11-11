@@ -1,5 +1,6 @@
-/* extras.js (v2) - SMS button, consumption graph, low-balance alerts,
- * DEVICE ACTIVE fix, Graph tab, animated login screen.
+/* extras.js (v3) - SMS button, consumption graph, low-balance alerts,
+ * DEVICE ACTIVE fix, Graph tab, animated login screen,
+ * SMS phone numbers (Settings) + Test SMS button.
  *
  * Isang line lang ang kailangan sa index.html, bago ang </body> (pagkatapos ng main script):
  *   <script src="extras.js"></script>
@@ -370,6 +371,56 @@
       };
       c.append(sv, el("p", "muted", "Example: 2 and 1 = 1st SMS at 2 kWh, 2nd WARNING at 1 kWh."));
     }
+    document.getElementById("v-settings").append(c);
+  };
+
+  /* ---------- SMS phone numbers (Settings) + Test SMS button ----------
+   * Naka-save sa Firebase: phones/room1, phones/room2, phones/room3  (format +639XXXXXXXXX)
+   * Landlord: nakikita/ine-edit ang 3 rooms. Tenant: sariling room lang.
+   * Binabasa ito ng central ESP32 kada 1 minuto. */
+  function normPH(s) {
+    const d = String(s || "").replace(/[\s\-()]/g, "");
+    if (/^09\d{9}$/.test(d)) return "+63" + d.slice(1);
+    if (/^639\d{9}$/.test(d)) return "+" + d;
+    if (/^\+639\d{9}$/.test(d)) return d;
+    return null;
+  }
+
+  const origSettings2 = window.buildSettings;
+  window.buildSettings = function () {
+    origSettings2.apply(this, arguments);
+    const isL = S.role === "landlord", rs = isL ? ROOMS : [S.room], inputs = {};
+    const c = el("div", "card");
+    c.append(el("h3", null, "SMS Phone Number"),
+      el("div", "muted", "The central device sends SMS alerts (low balance, zero balance, top-up, device offline/online) to this number. Format: 09XXXXXXXXX."));
+    rs.forEach(r => {
+      const inp = el("input"); inp.type = "tel"; inp.inputMode = "tel"; inp.placeholder = "09XXXXXXXXX"; inputs[r] = inp;
+      c.append(el("b", null, rname(r)), inp);
+      db.ref("phones/" + r).once("value").then(s => { if (s.val()) inp.value = s.val(); }).catch(() => {});
+    });
+    const sv = el("button", null, isL ? "Save Numbers" : "Save Number");
+    sv.onclick = async () => {
+      const out = {};
+      for (const r of rs) {
+        const raw = inputs[r].value.trim();
+        if (!raw) { out[r] = null; continue; }            // blank = remove the number
+        const n = normPH(raw);
+        if (!n) return toast(rname(r) + ": invalid number. Use 09XXXXXXXXX.", true);
+        out[r] = n;
+      }
+      sv.disabled = true;
+      try {
+        for (const r of rs) { await db.ref("phones/" + r).set(out[r]); if (out[r]) inputs[r].value = out[r]; }
+        toast("Number saved. The central device picks it up within 1 minute.");
+      } catch (e) { toast("Save failed: " + errMsg(e), true); }
+      sv.disabled = false;
+    };
+    c.append(sv);
+    rs.forEach(r => {
+      const t = el("button", "sec", "📩 Test SMS · " + rname(r));
+      t.onclick = () => sendNotify(r, t); c.append(t);
+    });
+    c.append(el("p", "muted", "Save the number first, then tap Test SMS. It sends the current balance and device status."));
     document.getElementById("v-settings").append(c);
   };
 
